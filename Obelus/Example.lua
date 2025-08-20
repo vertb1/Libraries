@@ -1,4 +1,4 @@
-local library, notifications, themes = loadstring(game:HttpGet("https://raw.githubusercontent.com/i77lhm/Libraries/refs/heads/main/Obelus/Library.lua"))()
+local library, notifications, themes = loadstring(game:HttpGet("https://raw.githubusercontent.com/vertb1/Libraries/refs/heads/main/Obelus/Library.lua"))()
 
 local dim2 = UDim2.new 
 local hex = Color3.fromHex 
