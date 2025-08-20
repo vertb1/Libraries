@@ -8,7 +8,7 @@
     local lighting = game:GetService("Lighting")
     local run = game:GetService("RunService")
     local stats = game:GetService("Stats")
-    local coregui = game.Players.LocalPlayer.PlayerGui
+    local coregui = game:GetService("CoreGui")
     local debris = game:GetService("Debris")
     local tween_service = game:GetService("TweenService")
     local sound_service = game:GetService("SoundService")
@@ -3696,11 +3696,11 @@
         
         -- Instances
             local outline = library:create("Frame", {
-                Parent = gethui();
-                Size = dim2(0, 0, 0, 0);
-                BorderColor3 = rgb(0, 0, 0);
-                BorderSizePixel = 0;
-                AutomaticSize = Enum.AutomaticSize.XY;
+                Parent = coregui,
+                Size = dim2(0, 0, 0, 0),
+                BorderColor3 = rgb(0, 0, 0),
+                BorderSizePixel = 0,
+                AutomaticSize = Enum.AutomaticSize.XY,
                 BackgroundColor3 = rgb(46, 46, 46)
             });
 
