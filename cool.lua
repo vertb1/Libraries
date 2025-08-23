@@ -192,6 +192,8 @@ local Library do
     Library = {
         Flags = { },
         
+        IsUnloading = false,
+        
         Theme = {
             ["Background"] = FromRGB(15, 15, 20),
             ["Inline"] = FromRGB(20, 20, 25),
@@ -393,7 +395,8 @@ local Library do
                 return
             end
 
-            Tween:Pause()
+            self.Tween:Pause()
+            self.Tween = nil
             self = nil
         end
     end
@@ -436,7 +439,7 @@ local Library do
         end
 
         Instances.AddToTheme = function(self, Properties)
-            if not self.Instance then 
+            if not self.Instance or not Library or Library.IsUnloading then 
                 return
             end
 
@@ -444,7 +447,7 @@ local Library do
         end
 
         Instances.ChangeItemTheme = function(self, Properties)
-            if not self.Instance then 
+            if not self.Instance or not Library or Library.IsUnloading then 
                 return
             end
 
@@ -464,7 +467,7 @@ local Library do
         end
 
         Instances.Tween = function(self, Info, Goal)
-            if not self.Instance then 
+            if not self.Instance or not Tween or not Library or Library.IsUnloading then 
                 return
             end
 
@@ -714,18 +717,50 @@ local Library do
     end
 
     Library.Unload = function(self)
+        -- Set unloading flag to prevent further operations
+        self.IsUnloading = true
+        
+        -- Wait a brief moment to let any ongoing operations finish
+        task.wait(0.1)
+        
+        -- Disconnect all connections first
         for Index, Value in self.Connections do 
-            Value.Connection:Disconnect()
+            if Value and Value.Connection then
+                pcall(function() Value.Connection:Disconnect() end)
+            end
         end
 
+        -- Close all threads
         for Index, Value in self.Threads do 
-            coroutine.close(Value)
+            if Value and coroutine.status(Value) ~= "dead" then
+                pcall(function() coroutine.close(Value) end)
+            end
         end
 
+        -- Clean up the main holder GUI
         if self.Holder then 
-            self.Holder:Clean()
+            pcall(function() self.Holder:Clean() end)
         end
 
+        -- Clean up notification holder
+        if self.NotifHolder then
+            pcall(function() self.NotifHolder:Clean() end)
+        end
+
+        -- Clear all references
+        self.Connections = {}
+        self.Threads = {}
+        self.ThemeItems = {}
+        self.ThemeMap = {}
+        self.Pages = {}
+        self.Sections = {}
+        self.Flags = {}
+        self.SetFlags = {}
+        
+        -- Wait a bit more before final cleanup
+        task.wait(0.2)
+        
+        -- Set to nil last
         Library = nil 
         getgenv().Library = nil
     end
@@ -1260,6 +1295,8 @@ local Library do
             end
 
             function NewKey:SetStatus(Status)
+                if not Library or not Library.Theme or Library.IsUnloading then return end
+                
                 if Status == "Active" then 
                     NewKey:Tween(nil, {TextColor3 = Library.Theme.Accent})
                     NewKey:ChangeItemTheme({TextColor3 = "Accent"})
@@ -2116,6 +2153,8 @@ local Library do
         end
 
         function Keybind:SetMode(Mode)
+            if not Library or not Library.Theme or Library.IsUnloading then return end
+            
             for Index, Value in Modes do 
                 if Index == Mode then 
                     Value:Tween(nil, {TextColor3 = Library.Theme.Accent})
@@ -3536,6 +3575,7 @@ local Library do
                 if Toggle.Value then 
                     return 
                 end
+                if not Library or not Library.Theme or Library.IsUnloading then return end
 
                 Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
                 Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element", BorderColor3 = "Border"})
@@ -3545,6 +3585,7 @@ local Library do
                 if Toggle.Value then 
                     return 
                 end
+                if not Library or not Library.Theme or Library.IsUnloading then return end
 
                 Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element"]})
                 Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
@@ -3708,18 +3749,24 @@ local Library do
             }):AddToTheme({Color = "Text Border"})
 
             Items["Button"]:OnHover(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
                 Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element", BorderColor3 = "Border"})
             end)
 
             Items["Button"]:OnHoverLeave(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element"]})
                 Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
             end)
         end
 
         function Button:Press()
+            if not Library or not Library.Theme or Library.IsUnloading then return end
+            
             Library:SafeCall(Button.Callback)
+
+            if not Items["Text"] or not Items["Button"] or not Library or Library.IsUnloading then return end
 
             Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
             Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
@@ -3728,6 +3775,8 @@ local Library do
             Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
 
             task.wait(0.1)
+
+            if not Library or not Library.Theme or Library.IsUnloading or not Items["Text"] or not Items["Button"] then return end
 
             Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
             Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element"})
@@ -3876,11 +3925,13 @@ local Library do
             end
 
             Items["RealSlider"]:OnHover(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["RealSlider"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
                 Items["RealSlider"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element", BorderColor3 = "Border"})
             end)
 
             Items["RealSlider"]:OnHoverLeave(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["RealSlider"]:Tween(nil, {BackgroundColor3 = Library.Theme["Background"]})
                 Items["RealSlider"]:ChangeItemTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
             end)
@@ -4106,11 +4157,13 @@ local Library do
             })
 
             Items["RealDropdown"]:OnHover(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["RealDropdown"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
                 Items["RealDropdown"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element", BorderColor3 = "Border"})
             end)
 
             Items["RealDropdown"]:OnHoverLeave(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["RealDropdown"]:Tween(nil, {BackgroundColor3 = Library.Theme["Background"]})
                 Items["RealDropdown"]:ChangeItemTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
             end)
@@ -4580,11 +4633,13 @@ local Library do
             }):AddToTheme({Color = "Text Border"})
 
             Items["Background"]:OnHover(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["Background"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
                 Items["Background"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element", BorderColor3 = "Border"})
             end)
 
             Items["Background"]:OnHoverLeave(function()
+                if not Library or not Library.Theme or Library.IsUnloading then return end
                 Items["Background"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element"]})
                 Items["Background"]:ChangeItemTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
             end)
@@ -4895,392 +4950,3 @@ local Library do
         return Listbox
     end
 end
---
-local Window = Library:Window({
-    Name = "you can change the name here",
-    --Size = UDim2.new(0, 600, 0, 400),
-    FadeSpeed = 0.25
-})
-
-local Watermark = Library:Watermark("thugsense ~ ".. os.date("%b %d %Y") .. " ~ ".. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
-local KeybindList = Library:KeybindList()
-
-Watermark:SetVisibility(false)
-KeybindList:SetVisibility(false)
-
-local CombatTab = Window:Page({Name = "Combat", Columns = 2, Subtabs = false})
-local MiscTab = Window:Page({Name = "Misc", Columns = 2, Subtabs = true})
-local VisualsTab = Window:Page({Name = "Visuals", Columns = 2, Subtabs = false})
-local PlayersTab = Window:Page({Name = "Players", Columns = 2, Subtabs = false})
-local SettingsTab = Window:Page({Name = "Settings", Columns = 2, Subtabs = false})
-
-local NewSubtab = MiscTab:SubPage({Icon = "79080568477801", Columns = 2})
-local NewSubtab2 = MiscTab:SubPage({Icon = "84929780240463", Columns = 2})
-
-do -- Combat Tab
-    local AimbotSection = CombatTab:Section({Name = "Aimbot", Side = 1})
-
-    AimbotSection:Toggle({Name = "Enabled", Flag = "Enabled", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Keybind({Name = "Hotkey", Flag = "Hotkey", Default = Enum.KeyCode.Z, Mode = "Toggle", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Slider({Name = "Hit Chance", Min = 0, Max = 100, Default = 100, Suffix = "%", Decimals = 1, Compact = true, Flag = "Hit Chance", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "FoV", Flag = "FoV", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Colorpicker({Name = "FoV Color", Flag = "FoV Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value, Alpha)
-        print(Value, Alpha)
-    end})
-
-    local Divider = AimbotSection:Divider()
-
-    AimbotSection:Toggle({Name = "Silent Aim", Flag = "Silent Aim", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Auto Fire", Flag = "Auto Fire", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Slider({Name = "FoV Size", Min = 0, Max = 1000, Default = 50, Decimals = 0.1, Flag = "FoV Size", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Dropdown({Name = "Bone", Flag = "Bone", Default = "Head", Items = {"Head", "Torso", "Cock", "Ass🤤"}, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Dropdown({Name = "Multi part", Flag = "Multi Bone", Default = {"Head", "Torso"}, Multi = true, Items = {"Head", "Torso", "Cock", "Ass🤤"}, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Visible Check", Flag = "Visible Check2", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Wall Check", Flag = "Wall Check2", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    local WeaponSection = CombatTab:Section({Name = "Weapon", Side = 2})
-
-    WeaponSection:Toggle({Name = "Auto reload", Flag = "Auto Reload", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Infinite ammo", Flag = "Infinite Ammo", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "No recoil", Flag = "No Recoil", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "No spread", Flag = "No spread", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Instant hit", Flag = "Instant hit", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Instant reload", Flag = "Instant reload", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Rapid fire", Flag = "Rapid fire", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    local Ragebot, Originscan, Visuals = CombatTab:MultiSection({Sections = {"Ragebot", "Origin scan", "Visuals"}, Side = 2})
-
-    Ragebot:Toggle({Name = "Enabled", Flag = "Ragebot", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Ragebot:Toggle({Name = "Visible Check", Flag = "Visible Check", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Ragebot:Toggle({Name = "Wall Check", Flag = "Wall Check", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Originscan:Toggle({Name = "Enabled", Flag = "Origin Scan", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Originscan:Slider({Name = "Studs", Min = 0, Max = 50, Default = 15, Decimals = 1, Flag = "st", Callback = function(Value)
-        print(Value)
-    end})
-
-    Visuals:Toggle({Name = "Enabled", Flag = "Visuals", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Visuals:Toggle({Name = "Indicator", Flag = "Box", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Colorpicker({Name = "Color", Flag = "Box Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value)
-        print(Value)
-    end})
-
-    local HighlightLabel = Visuals:Toggle({Name = "Highlight", Flag = "Highlight", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-    HighlightLabel:Colorpicker({Name = "Color", Flag = "Highlight Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value)
-        print(Value)
-    end})
-
-    HighlightLabel:Colorpicker({Name = "Outline Color", Flag = "Highlight Outline Color", Default = Color3.fromRGB(0, 0, 0), Callback = function(Value)
-        print(Value)
-    end})
-
-    local ScrollableSection = CombatTab:ScrollableSection({Name = "Section", Side = 2, Size = 185})
-
-    for Index = 1, 25 do 
-        ScrollableSection:Toggle({Name = "Toggle", Flag = "Toggle1234" .. Index})
-    end
-
-    ScrollableSection:Slider({Name = "Slider", Min = 0, Max = 100, Default = 50, Suffix = "%", Decimals = 1, Compact = true, Flag = "Slider"})
-end
-
-do -- Misc tab
-    local AimbotSection = NewSubtab:Section({Name = "Aimbot", Side = 1})
-
-    AimbotSection:Toggle({Name = "Enabled", Flag = "Enabled", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Keybind({Name = "Hotkey", Flag = "Hotkey", Default = Enum.KeyCode.Z, Mode = "Toggle", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Slider({Name = "Hit Chance", Min = 0, Max = 100, Default = 100, Suffix = "%", Decimals = 1, Compact = true, Flag = "Hit Chance", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "FoV", Flag = "FoV", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Colorpicker({Name = "FoV Color", Flag = "FoV Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value, Alpha)
-        print(Value, Alpha)
-    end})
-
-    local Divider = AimbotSection:Divider()
-
-    AimbotSection:Toggle({Name = "Silent Aim", Flag = "Silent Aim", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Auto Fire", Flag = "Auto Fire", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Slider({Name = "FoV Size", Min = 0, Max = 1000, Default = 50, Decimals = 0.1, Flag = "FoV Size", Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Dropdown({Name = "Bone", Flag = "Bone", Default = "Head", Items = {"Head", "Torso", "Cock", "Ass🤤"}, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Dropdown({Name = "Multi part", Flag = "Multi Bone", Default = {"Head", "Torso"}, Multi = true, Items = {"Head", "Torso", "Cock", "Ass🤤"}, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Visible Check", Flag = "Visible Check2", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    AimbotSection:Toggle({Name = "Wall Check", Flag = "Wall Check2", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    local WeaponSection = NewSubtab:Section({Name = "Weapon", Side = 2})
-
-    WeaponSection:Toggle({Name = "Auto reload", Flag = "Auto Reload", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Infinite ammo", Flag = "Infinite Ammo", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "No recoil", Flag = "No Recoil", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "No spread", Flag = "No spread", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Instant hit", Flag = "Instant hit", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Instant reload", Flag = "Instant reload", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    WeaponSection:Toggle({Name = "Rapid fire", Flag = "Rapid fire", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    local Ragebot, Originscan, Visuals = NewSubtab:MultiSection({Sections = {"Ragebot", "Origin scan", "Visuals"}, Side = 2})
-
-    Ragebot:Toggle({Name = "Enabled", Flag = "Ragebot", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Ragebot:Toggle({Name = "Visible Check", Flag = "Visible Check", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Ragebot:Toggle({Name = "Wall Check", Flag = "Wall Check", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Originscan:Toggle({Name = "Enabled", Flag = "Origin Scan", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Originscan:Slider({Name = "Studs", Min = 0, Max = 50, Default = 15, Decimals = 1, Flag = "st", Callback = function(Value)
-        print(Value)
-    end})
-
-    Visuals:Toggle({Name = "Enabled", Flag = "Visuals", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-
-    Visuals:Toggle({Name = "Indicator", Flag = "Box", Default = false, Callback = function(Value)
-        print(Value)
-    end}):Colorpicker({Name = "Color", Flag = "Box Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value)
-        print(Value)
-    end})
-
-    local HighlightLabel = Visuals:Toggle({Name = "Highlight", Flag = "Highlight", Default = false, Callback = function(Value)
-        print(Value)
-    end})
-    HighlightLabel:Colorpicker({Name = "Color", Flag = "Highlight Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(Value)
-        print(Value)
-    end})
-
-    HighlightLabel:Colorpicker({Name = "Outline Color", Flag = "Highlight Outline Color", Default = Color3.fromRGB(0, 0, 0), Callback = function(Value)
-        print(Value)
-    end})
-
-    local ScrollableSection = NewSubtab:ScrollableSection({Name = "Section", Side = 2, Size = 185})
-
-    for Index = 1, 25 do 
-        ScrollableSection:Toggle({Name = "Toggle", Flag = "Toggle1234" .. Index})
-    end
-
-    ScrollableSection:Slider({Name = "Slider", Min = 0, Max = 100, Default = 50, Suffix = "%", Decimals = 1, Compact = true, Flag = "Slider"})
-end
-
-do -- Settings Tab
-    local SettingsSection = SettingsTab:Section({Name = "Settings", Side = 2})
-    local ConfigsSection = SettingsTab:Section({Name = "Profiles", Side = 1})
-
-    for Index, Value in Library.Theme do 
-        SettingsSection:Label({Name = Index, Alignment = "Left"}):Colorpicker({ Name = Index, Default = Value, Flag = "Theme"..Index, Callback = function(Color) 
-            Library.Theme[Index] = Color
-            Library:ChangeTheme(Index, Color)
-        end})
-    end
-
-    SettingsSection:Label({Name = "Menu Keybind", Alignment = "Left"}):Keybind({Name = "Menu Keybind", Flag = "Menu Keybind", Default = Enum.KeyCode.RightControl, Mode = "Toggle", Callback = function(Value)
-        Library.MenuKeybind = Library.Flags["Menu Keybind"].Key
-    end})
-
-    SettingsSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = false, Callback = function(Value)
-        Watermark:SetVisibility(Value)
-    end})
-
-    SettingsSection:Toggle({Name = "Keybind List", Flag = "Keybind List", Default = false, Callback = function(Value)
-        KeybindList:SetVisibility(Value)
-    end})
-
-    SettingsSection:Dropdown({Name = "Tweening Style", Flag = "Tweening Style", Default = "Exponential", Items = {"Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Exponential", "Circular", "Back", "Elastic", "Bounce"}, Callback = function(Value)
-        Library.Tween.Style = Enum.EasingStyle[Value]
-    end})
-
-    SettingsSection:Dropdown({Name = "Tweening Direction", Flag = "Tweening Direction", Default = "Out", Items = {"In", "Out", "InOut"}, Callback = function(Value)
-        Library.Tween.Direction = Enum.EasingDirection[Value]
-    end})
-
-    SettingsSection:Slider({Name = "Tweening Time", Min = 0, Max = 5, Default = 0.25, Decimals = 0.01, Flag = "Tweening Time", Callback = function(Value)
-        Library.Tween.Time = Value
-    end})
-
-    SettingsSection:Button({Name = "Notification test", Callback = function()
-        Library:Notification("This is a notification This is a notification This is a notification This is a notification", 5, Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255)))
-    end})
-
-    SettingsSection:Button({Name = "Unload library", Callback = function()
-        Library:Unload()
-    end})
-
-    local ConfigName 
-    local ConfigSelected
-
-    local ConfigsListbox = ConfigsSection:Listbox({Items = { }, Name = "Configs", Flag = "Configs List", Callback = function(Value)
-        ConfigSelected = Value
-    end})
-
-    ConfigsSection:Textbox({Name = "Config Name", Placeholder = ". .", Flag = "Config Name", Callback = function(Value)
-        ConfigName = Value
-    end})
-
-    ConfigsSection:Button({Name = "Create Config", Callback = function()
-        if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
-            writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
-
-            Library:RefreshConfigsList(ConfigsListbox)
-        else
-            Library:Notification("Config '" .. ConfigName .. ".json' already exists", 3, Color3.FromR(255, 0, 0))
-            return
-        end
-    end})
-
-    ConfigsSection:Button({Name = "Load Config", Callback = function()
-        if ConfigSelected then
-            Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. ConfigSelected))
-        end
-
-        Library:Thread(function()
-            task.wait(0.1)
-
-            for Index, Value in Library.Theme do 
-                Library.Theme[Index] = Library.Flags["Theme"..Index].Color
-                Library:ChangeTheme(Index, Library.Flags["Theme"..Index].Color)
-            end    
-        end)
-    end})
-
-    ConfigsSection:Button({Name = "Delete Config", Callback = function()
-        if ConfigSelected then
-            Library:DeleteConfig(ConfigSelected)
-
-            Library:RefreshConfigsList(ConfigsListbox)
-        end
-    end})
-
-    ConfigsSection:Button({Name = "Save Config", Callback = function()
-        if ConfigSelected then
-            Library:SaveConfig(ConfigSelected)
-        end
-    end})
-
-    ConfigsSection:Button({Name = "Refresh Configs", Callback = function()
-        Library:RefreshConfigsList(ConfigsListbox)
-    end})
-
-    Library:RefreshConfigsList(ConfigsListbox)
-end
-
-Library:Notification(string.format("Loaded in %.4f seconds", os.clock() - LoadingTick), 5, Library.Theme.Accent, {"rbxassetid://135757045959142", Color3.fromRGB(149, 255, 139)})
---
-getgenv().Library = Library
-return Library
