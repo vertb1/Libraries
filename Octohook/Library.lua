@@ -8717,7 +8717,7 @@ spawn(function()
     
     Library:Notification({
         Name = "Successfully loaded modules in " .. loadTime .. "ms", 
-        Lifetime = 5
+        Lifetime = 8
     })
 end)
 
