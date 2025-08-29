@@ -47,7 +47,7 @@
         preset = {
             inline = rgb(46, 46, 46),
             outline = rgb(10, 10, 15),
-            accent = rgb(19, 128, 225),
+            accent = rgb(255, 0, 181),
             background = rgb(20, 20, 25),              
             misc_1 = rgb(30, 30, 35),
             text_color = rgb(245, 245, 245),
@@ -4928,8 +4928,7 @@
                 Section:Slider({Name = "Dragging Speed", Min = 0, Max = 1, Decimal = .01, Default = .05, Callback = function(num)
                     Library.DraggingSpeed = num
                 end})
-                Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Key = Enum.KeyCode.E, Callback = function(bool) 
-                    print(bool)
+                Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Key = Enum.KeyCode.Insert, Callback = function(bool) 
                     Window.SetVisible(bool) 
                 end})
                 Window.Tweening = false
@@ -4940,27 +4939,7 @@
                     Library.KeybindList.Items.Holder.Visible = bool 
                     Library.KeybindList.Items.List.Visible = bool 
                 end})
-                Section:Textbox({Name = "Custom Menu Name", Default = Window.Name, Callback = function(text)
-                    Window.Name = text
-                end})
-                Section:Dropdown({Name = "Font", Options = FontIndexes, Callback = function(option)
-                    for _,text in themes.utility.text_color.TextColor3 do 
-                        text.FontFace = Fonts[option]
-                    end 
-                end, Default = "ProggyClean", Flag = "Menu Font"})
-                Section:Slider({Name = "TextSize", Default = 12, Decimal = 1, Min = 1, Max = 30, Callback = function(int)
-                    for _,text in themes.utility.text_color.TextColor3 do 
-                        text.TextSize = int
-                    end 
-
-                    themes.preset.textsize = int
-                end})
-                Section:Slider({Name = "Blur Intensity", Default = 14, Decimal = 1, Min = 1, Max = 100, Flag = "BlurSize", Callback = function(int)
-                    if Window.Items.Holder.Visible then 
-                        Library.Blur.Size = int
-                    end 
-                end})
-                Section:Button({Name = "Test", Callback = function()
+                Section:Button({Name = "Notification Test", Callback = function()
                     local Notification = Library:Notification({Name = "Hello there!", Lifetime = 5})
                     Notification:NotificationButton({Name = "Discard", Callback = function()
                         Notification.DestroyNotif()
@@ -7381,7 +7360,6 @@
             if Cfg.Chams then 
                 local Toggle = self.Section:Toggle({Name = Cfg.Name .. " Chams", Callback = function(bool)
                     Options["ChamsEnabled"] = bool
-                    print("I am real", bool)
                 end, Flag = Cfg.Name .. "_CHAMS"})
 
                 Toggle:Colorpicker({Name = "Fill", Color = rgb(255, 255, 255), Transparency = 1, Callback = function(color, alpha)
