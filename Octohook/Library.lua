@@ -4880,22 +4880,62 @@
                 local Section = Column:Section({Name = "Server"})
                 Section:Button({Name = "Copy JobId", Callback = function()
                     setclipboard(game.JobId)
+                    Library:Notification({Name = "Copied JobId to clipboard!", Lifetime = 3})
                 end})
                 Section:Button({Name = "Copy GameID", Callback = function()
                     setclipboard(game.GameId)
+                    Library:Notification({Name = "Copied GameId to clipboard!", Lifetime = 3})
                 end})
                 Section:Button({Name = "Copy Join Script", Callback = function()
                     setclipboard('game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)')
+                    Library:Notification({Name = "Copied join script to clipboard!", Lifetime = 3})
                 end})
                 Section:Button({Name = "Rejoin", Callback = function()
+                    Library:Notification({Name = "Rejoining server...", Lifetime = 3})
                     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
                 end})
                 Section:Button({Name = "Join New Server", Callback = function()
-                    local apiRequest = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+                    local success, apiRequest = pcall(function()
+                        return game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+                    end)
+                    
+                    if not success then
+                        Library:Notification({Name = "Failed to get server list!", Lifetime = 5})
+                        return
+                    end
+                    
+                    if not apiRequest.data or #apiRequest.data == 0 then
+                        Library:Notification({Name = "No servers available!", Lifetime = 5})
+                        return
+                    end
+                    
                     local data = apiRequest.data[math.random(1, #apiRequest.data)]
-
-                    if data.playing <= Flags["MaxPlayers"] then 
-                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, data.id)
+                    local playerCount = data.playing or 0
+                    local maxPlayers = Flags["MaxPlayers"] or 10
+                    
+                    if playerCount <= maxPlayers then 
+                        Library:Notification({Name = "Joining server with " .. playerCount .. " players...", Lifetime = 4})
+                        local teleportSuccess, teleportError = pcall(function()
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, data.id)
+                        end)
+                        
+                        if not teleportSuccess then
+                            Library:Notification({Name = "Failed to join server!", Lifetime = 5})
+                        end
+                    else
+                        Library:Notification({Name = "Server has " .. playerCount .. " players (max: " .. maxPlayers .. "). Trying again...", Lifetime = 4})
+                        -- Try to find another server
+                        for i = 1, #apiRequest.data do
+                            local serverData = apiRequest.data[i]
+                            if (serverData.playing or 0) <= maxPlayers then
+                                Library:Notification({Name = "Found server with " .. (serverData.playing or 0) .. " players! Joining...", Lifetime = 4})
+                                pcall(function()
+                                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, serverData.id)
+                                end)
+                                return
+                            end
+                        end
+                        Library:Notification({Name = "No servers found with " .. maxPlayers .. " or fewer players!", Lifetime = 5})
                     end 
                 end})
                 Section:Slider({Name = "Max Players", Min = 0, Max = 40, Default = 10, Decimal = 1, Flag = "MaxPlayers"})
