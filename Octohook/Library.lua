@@ -1208,6 +1208,7 @@
                         Parent = Library.Elements;
                         Size = dim2(0, 0, 0, 20);
                         Name = "\0";
+                        Visible = true;
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         AutomaticSize = Enum.AutomaticSize.XY;
@@ -1293,6 +1294,7 @@
                     Items.Holder = Library:Create( "Frame", {
                         Parent = Library.Elements;
                         Name = "\0";
+                        Visible = true;
                         ZIndex = 5;
                         Position = dim2(0, 300, 0, 100);
                         BorderColor3 = rgb(0, 0, 0);
@@ -1707,6 +1709,7 @@
             });
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
+            Library.KeybindList.Items.List.Visible = true
 
             local Items = Cfg.Items; do
                 -- Items 
