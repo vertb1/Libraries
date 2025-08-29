@@ -2005,6 +2005,18 @@
                 end 
             end)
 
+            -- Auto-load config if one is set
+            spawn(function()
+                wait(1) -- Wait a bit for everything to initialize
+                if isfile(Library.Directory .. "/autoload.txt") then
+                    local autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
+                    if isfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg") then
+                        Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg"))
+                        Library:Notification({Name = "Auto-loaded config: " .. autoLoadConfig, Lifetime = 5})
+                    end
+                end
+            end)
+
             return setmetatable(Cfg, Library)
         end 
 
@@ -4832,6 +4844,38 @@
                     Library:Notification({Name = "Deleted config.", Lifetime = 5})
                     Library:UpdateConfigList() 
                 end})
+
+                Section:Button({Name = "Set as Auto Load", Callback = function() 
+                    if ConfigText and ConfigText ~= "" then
+                        writefile(Library.Directory .. "/autoload.txt", ConfigText)
+                        Library:Notification({Name = "Set " .. ConfigText .. " as auto load config.", Lifetime = 5})
+                        -- Update the auto load text display
+                        if AutoLoadText then
+                            AutoLoadText.Set("Auto Load: " .. ConfigText)
+                        end
+                    else
+                        Library:Notification({Name = "Please enter a config name first.", Lifetime = 5})
+                    end
+                end})
+
+                Section:Button({Name = "Clear Auto Load", Callback = function() 
+                    if isfile(Library.Directory .. "/autoload.txt") then
+                        delfile(Library.Directory .. "/autoload.txt")
+                        Library:Notification({Name = "Cleared auto load config.", Lifetime = 5})
+                        if AutoLoadText then
+                            AutoLoadText.Set("Auto Load: None")
+                        end
+                    else
+                        Library:Notification({Name = "No auto load config set.", Lifetime = 5})
+                    end
+                end})
+
+                -- Auto Load Status Text
+                local autoLoadConfig = "None"
+                if isfile(Library.Directory .. "/autoload.txt") then
+                    autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
+                end
+                AutoLoadText = Section:Label({Name = "Auto Load: " .. autoLoadConfig})
 
                 local Section = Column:Section({Name = "Server"})
                 Section:Button({Name = "Copy JobId", Callback = function()
