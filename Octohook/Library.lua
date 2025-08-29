@@ -1,3 +1,18 @@
+--[[
+    vert$! UI Library
+    -> Customized and modified for our needs
+    -> Based on Octohook library by @finobe
+    -> Modifications include:
+        Removed custom menu name/blur/font settings
+        Changed menu bind to Insert key
+        Added server notifications with player count info
+        Added config auto-load functionality
+        Removed debug print statements
+        Cleaned up watermark display
+        Added loading time notification
+    -> Ready for ur script implementation
+--]]
+
 -- Variables 
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, Lighting = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("Lighting")
     local Camera, LocalPlayer, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
@@ -384,7 +399,7 @@
                 table.insert(EnumParts, part)
             end
             
-            local EnumTable = tostring(enum)  
+            local EnumTable = Enum  
 
             for i = 2, #EnumParts do
                 local EnumItem = EnumTable[EnumParts[i]]
@@ -4832,6 +4847,20 @@
                     writefile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg", Library:GetConfig())
                     Library:Notification({Name = "Saved config.", Lifetime = 5})
                     Library:UpdateConfigList()
+                end})
+
+                Section:Button({Name = "Overwrite File", Callback = function() 
+                    if ConfigText and ConfigText ~= "" then
+                        if isfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg") then
+                            writefile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg", Library:GetConfig())
+                            Library:Notification({Name = "Overwritten config: " .. ConfigText, Lifetime = 5})
+                            Library:UpdateConfigList()
+                        else
+                            Library:Notification({Name = "Config '" .. ConfigText .. "' does not exist to overwrite.", Lifetime = 5})
+                        end
+                    else
+                        Library:Notification({Name = "Please enter a config name first.", Lifetime = 5})
+                    end
                 end})
 
                 Section:Button({Name = "Load", Callback = function() 
