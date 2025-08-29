@@ -1,19 +1,3 @@
---[[
-    Octohook
-    -> Made by @finobe 
-    -> Kind of got bored idk what to do with life
-    -> Reason for leak: 
-    User was offered free features when the library was finished as compensation for the wait
-    Then proceeded to ask for more and started harassing other customers and me over petty shit. 
-    Yes this user said the library is TRASH somehow.. sob
-
-    Anyways bringing u this pretty sexy library I spent like a week on it maybe less. 
-    Esp preview took me a couple hours to make but holy the amount of bug fixing is insane
-
-    LIBRARY MAY HAVE MISSING OPTIMISATION THAT IS REQUIRED FOR 0 FPS LOSS WHEN DRAGGING / CLOSING THE MENU. 
-    ^^ Dont have to be worried about this its pretty darn optimised for the amount of elements I store 
-]]
-
 -- Variables 
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, Lighting = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("Lighting")
     local Camera, LocalPlayer, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
@@ -25,7 +9,7 @@
 
 -- Library init
     getgenv().Library = {
-        Directory = "octo",
+        Directory = "vert$!",
         Folders = {
             "/fonts",
             "/configs",
@@ -47,7 +31,7 @@
         preset = {
             inline = rgb(46, 46, 46),
             outline = rgb(10, 10, 15),
-            accent = rgb(255, 0, 181),
+            accent = rgb(255, 255, 255),
             background = rgb(20, 20, 25),              
             misc_1 = rgb(30, 30, 35),
             text_color = rgb(245, 245, 245),
@@ -1664,7 +1648,7 @@
     -- Library element functions
         function Library:Window(properties)
             local Cfg = {
-                Name = properties.Name or "nebula";
+                Name = properties.Name or "vert$!";
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 Items = {};
                 Tweening = false;
@@ -1899,7 +1883,7 @@
                         Parent = Items.Background;
                         TextColor3 = themes.preset.accent;
                         TextStrokeColor3 = rgb(255, 255, 255);
-                        Text = 'octohook.xyz <font color = "rgb(235, 235, 235)">@placeholder / UID @ / Developer / 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
+                        Text = 'octohook.xyz <font color = "rgb(235, 235, 235)">/ 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
                         Name = "\0";
                         AutomaticSize = Enum.AutomaticSize.XY;
                         BorderSizePixel = 0;
@@ -2014,10 +1998,8 @@
                 if Tick - Cfg.Tick >= 1 then 
                     Cfg.Tick = Tick
 
-                    local Uid = 1
-                    local Status = "Developer"
                     local Ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-                    Cfg.ChangeWatermarkTitle(string.format('%s <font color = "%s">/ UID %s / %s / %s / %sfps / %sms</font>', Cfg.Name, Library:ConvertHex(themes.preset.text_color), Uid, Status, os.date("%x / %X"), Cfg.Fps, Ping))
+                    Cfg.ChangeWatermarkTitle(string.format('%s <font color = "%s">/ %s / %sfps / %sms</font>', Cfg.Name, Library:ConvertHex(themes.preset.text_color), os.date("%x / %X"), Cfg.Fps, Ping))
 
                     Cfg.Fps = 0
                 end 
@@ -4932,13 +4914,6 @@
                     Window.SetVisible(bool) 
                 end})
                 Window.Tweening = false
-                Section:Toggle({Name = "Toggle Watermark", Callback = function(bool)
-                    Window.SetWatermarkVisible(bool)
-                end})
-                Section:Toggle({Name = "Toggle Keybind List", Callback = function(bool)
-                    Library.KeybindList.Items.Holder.Visible = bool 
-                    Library.KeybindList.Items.List.Visible = bool 
-                end})
                 Section:Button({Name = "Notification Test", Callback = function()
                     local Notification = Library:Notification({Name = "Hello there!", Lifetime = 5})
                     Notification:NotificationButton({Name = "Discard", Callback = function()
