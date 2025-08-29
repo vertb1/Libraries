@@ -1296,7 +1296,7 @@
                         Name = "\0";
                         Visible = true;
                         ZIndex = 5;
-                        Position = dim2(0, 300, 0, 100);
+                        Position = dim2(0, 50, 0, 100);
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         AutomaticSize = Enum.AutomaticSize.X;
@@ -1322,7 +1322,7 @@
             end)
 
             task.delay(0.01, function()
-                Items.List.Position = dim2(0, 50, 0, 700);
+                Items.List.Position = dim2(0, 50, 0, 100);
             end)
             
             return setmetatable(Cfg, Library)
@@ -1710,6 +1710,16 @@
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
             Library.KeybindList.Items.List.Visible = true
+            
+            -- Add a test element to ensure the list is visible
+            spawn(function()
+                wait(1)
+                if Library.KeybindList then
+                    local testElement = Library.KeybindList:ListElement({})
+                    testElement.SetText("Test Keybind [H] - Toggle")
+                    testElement.SetVisible(true)
+                end
+            end)
 
             local Items = Cfg.Items; do
                 -- Items 
