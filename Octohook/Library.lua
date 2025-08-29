@@ -8711,16 +8711,14 @@
 
 -- Calculate loading time and show success notification
 spawn(function()
-    wait(0.1) -- Small delay to ensure everything is fully loaded
+    wait(0.5) -- Wait a bit longer to ensure notification system is ready
     local loadEndTime = tick()
     local loadTime = math.floor((loadEndTime - loadStartTime) * 1000) -- Convert to milliseconds
     
-    if Library and Library.Notification then
-        Library:Notification({
-            Name = "Successfully loaded modules in " .. loadTime .. "ms", 
-            Lifetime = 5
-        })
-    end
+    Library:Notification({
+        Name = "Successfully loaded modules in " .. loadTime .. "ms", 
+        Lifetime = 5
+    })
 end)
 
 return Library, Esp, MiscOptions, Options 
