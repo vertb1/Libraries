@@ -1886,7 +1886,7 @@
                         Parent = Items.Background;
                         TextColor3 = themes.preset.accent;
                         TextStrokeColor3 = rgb(255, 255, 255);
-                        Text = 'octohook.xyz <font color = "rgb(235, 235, 235)">/ 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
+                        Text = 'vert$! <font color = "rgb(235, 235, 235)">/ 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
                         Name = "\0";
                         AutomaticSize = Enum.AutomaticSize.XY;
                         BorderSizePixel = 0;
