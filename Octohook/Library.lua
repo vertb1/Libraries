@@ -399,7 +399,7 @@
                 table.insert(EnumParts, part)
             end
             
-            local EnumTable = Enum  
+            local EnumTable = tostring(enum)  
 
             for i = 2, #EnumParts do
                 local EnumItem = EnumTable[EnumParts[i]]
