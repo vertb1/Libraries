@@ -1832,7 +1832,7 @@
                     Items.Watermark = Library:Create( "Frame" , {
                         Parent = Library.Elements;
                         Name = "\0";
-                        Visible = false;
+                        Visible = true;
                         Position = dim2(0.024000000208616257, 0, 0, 33);
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
