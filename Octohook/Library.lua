@@ -5,6 +5,9 @@
     local vec2, vec3, dim2, dim, rect, dim_offset = Vector2.new, Vector3.new, UDim2.new, UDim.new, Rect.new, UDim2.fromOffset
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
     local angle, empty_cfr, cfr = CFrame.Angles, CFrame.new(), CFrame.new
+    
+    -- Track loading time
+    local loadStartTime = tick()
 -- 
 
 -- Library init
@@ -8705,5 +8708,19 @@
 
     Esp.Loop = RunService:BindToRenderStep("Run Loop", 400, Esp.Update)
 -- 
+
+-- Calculate loading time and show success notification
+spawn(function()
+    wait(0.1) -- Small delay to ensure everything is fully loaded
+    local loadEndTime = tick()
+    local loadTime = math.floor((loadEndTime - loadStartTime) * 1000) -- Convert to milliseconds
+    
+    if Library and Library.Notification then
+        Library:Notification({
+            Name = "Successfully loaded modules in " .. loadTime .. "ms", 
+            Lifetime = 5
+        })
+    end
+end)
 
 return Library, Esp, MiscOptions, Options 
