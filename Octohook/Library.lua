@@ -1710,16 +1710,6 @@
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
             Library.KeybindList.Items.List.Visible = true
-            
-            -- Add a test element to ensure the list is visible
-            spawn(function()
-                wait(1)
-                if Library.KeybindList then
-                    local testElement = Library.KeybindList:ListElement({})
-                    testElement.SetText("Test Keybind [H] - Toggle")
-                    testElement.SetVisible(true)
-                end
-            end)
 
             local Items = Cfg.Items; do
                 -- Items 
@@ -1864,7 +1854,7 @@
                         Parent = Library.Elements;
                         Name = "\0";
                         Visible = true;
-                        Position = dim2(0.024000000208616257, 0, 0, 33);
+                        Position = dim2(0.024000000208616257, 0, 0, 80);
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         AutomaticSize = Enum.AutomaticSize.XY;
@@ -5039,9 +5029,17 @@
                 Section:Slider({Name = "Dragging Speed", Min = 0, Max = 1, Decimal = .01, Default = .05, Callback = function(num)
                     Library.DraggingSpeed = num
                 end})
-                Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Key = Enum.KeyCode.Insert, Callback = function(bool) 
+                Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Key = Enum.KeyCode.Insert, Flag = "MenuBind", Callback = function(bool) 
                     Window.SetVisible(bool) 
                 end})
+                
+                -- Automatically show menu bind in keybind list
+                spawn(function()
+                    wait(0.1)
+                    if Flags then
+                        Flags["MenuBind_LIST"] = true
+                    end
+                end)
                 Window.Tweening = false
                 Section:Button({Name = "Notification Test", Callback = function()
                     local Notification = Library:Notification({Name = "Hello there!", Lifetime = 5})
