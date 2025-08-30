@@ -5007,6 +5007,14 @@ local success, result = pcall(function()
             local Section = Tab:Section({Name = "Other", Side = "Right"})
             Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
             Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
+            Section:Button({Name = "Test Notification", Callback = function()
+                if Library and Library.Notifications then
+                    Library.Notifications:Create({
+                        Name = "This is a test notification!",
+                        Lifetime = 5
+                    })
+                end
+            end})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
             end});
@@ -5220,15 +5228,16 @@ pcall(function()
     local loadTime = tick() - loadStartTime
     local loadTimeMs = math.floor(loadTime * 1000)
     
-    -- Wait a moment for everything to initialize
-    task.wait(0.5)
-    
-    if Notifications and Notifications.Create then
-        Notifications:Create({
-            Name = string.format("Successfully loaded modules in %dms", loadTimeMs),
-            Lifetime = 8
-        })
-    end
+    -- Wait a moment for everything to initialize, then show load notification
+    task.spawn(function()
+        task.wait(0.1)
+        if Library and Library.Notifications and Library.Notifications.Create then
+            Library.Notifications:Create({
+                Name = string.format("vert$! - Successfully loaded in %dms", loadTimeMs),
+                Lifetime = 8
+            })
+        end
+    end)
 end)
 
 return Library, Notifications, themes
@@ -5250,7 +5259,7 @@ else
     pcall(function()
         if getgenv().Library and getgenv().Library.Notifications then
             getgenv().Library.Notifications:Create({
-                Name = string.format("Failed to load modules after %dms - Check console for details", loadTimeMs),
+                Name = string.format("vert$! - Failed to load after %dms - Check console", loadTimeMs),
                 Lifetime = 8
             })
         end
