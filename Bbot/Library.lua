@@ -1433,8 +1433,22 @@ local success, result = pcall(function()
     
     -- Library element functions
         function Library:Window(properties)
+            -- Generate commit ID for version tracking
+            local function getCommitId()
+                local chars = "0123456789abcdef"
+                local commitId = ""
+                for i = 1, 7 do
+                    local randomIndex = math.random(1, #chars)
+                    commitId = commitId .. chars:sub(randomIndex, randomIndex)
+                end
+                return commitId
+            end
+            
+            local commitId = getCommitId()
+            local windowName = properties.Name or ("vert$! (commit " .. commitId .. ")")
+            
             local Cfg = {
-                Name = properties.Name or "vert$!";
+                Name = windowName;
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 TabInfo;
                 Items = {};
@@ -1959,7 +1973,7 @@ local success, result = pcall(function()
                         TextColor3 = rgb(239, 239, 239);
                         BorderColor3 = rgb(0, 0, 0);
                         RichText = true;
-                        Text = "vert$!.lua";
+                        Text = "vert$!.lua (commit " .. commitId .. ")";
                         Parent = Items.Watermark;
                         Name = "\0";
                         BackgroundTransparency = 1;
@@ -2043,7 +2057,7 @@ local success, result = pcall(function()
             end
 
             function Cfg.ChangeWatermarkTitle(text)
-                Cfg.WatermarkBaseName = text or "vert$!.lua"
+                Cfg.WatermarkBaseName = text or ("vert$!.lua (commit " .. commitId .. ")")
             end
 
             -- Ensure watermark and keybind list are always visible
@@ -2052,7 +2066,7 @@ local success, result = pcall(function()
 
             -- Live watermark updating
             do
-                Cfg.WatermarkBaseName = "vert$!.lua" -- Default base name
+                Cfg.WatermarkBaseName = "vert$!.lua (commit " .. commitId .. ")" -- Default base name
                 local gameName = "Unknown Game"
                 
                 -- Get game name
