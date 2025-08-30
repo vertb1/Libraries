@@ -4866,9 +4866,80 @@
 
             delay(2, function() window.Tweening = false end)
 
+            local ServerSection = Tab:Section({Name = "Server", Side = "Left"})
+            ServerSection:Button({Name = "Rejoin Server", Callback = function() 
+                Notifications:Create({Name = "Rejoining server..."}) 
+                game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+            end})
+
+            ServerSection:Button({Name = "Server Hop", Callback = function() 
+                Notifications:Create({Name = "Finding new server..."}) 
+                local PlaceId = game.PlaceId
+                local AllIDs = {}
+                local foundAnything = ""
+                local actualHour = os.date("!*t").hour
+                local Deleted = false
+                
+                function TPReturner()
+                    local Site; if foundAnything == "" then Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100') else Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything) end
+                    local body = game:GetService('HttpService'):JSONDecode(Site)
+                    local cursor = body.nextPageCursor
+                    local servers = {}
+                    if game.JobId ~= "" and body.data then
+                        for i,v in pairs(body.data) do
+                            if type(v) == "table" and v.maxPlayers and v.playing and v.id ~= game.JobId then
+                                table.insert(servers, 1, v.id)
+                            end
+                        end
+                    end
+                    if #servers > 0 then
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], game:GetService("Players").LocalPlayer)
+                    else
+                        TPReturner()
+                    end
+                end
+                TPReturner()
+            end})
+
+            ServerSection:Button({Name = "Copy Job ID", Callback = function() 
+                setclipboard(game.JobId)
+                Notifications:Create({Name = "Job ID copied to clipboard!"}) 
+            end})
+
+            ServerSection:Button({Name = "Get Join Script", Callback = function() 
+                local script = string.format('game:GetService("TeleportService"):TeleportToPlaceInstance(%d, "%s", game:GetService("Players").LocalPlayer)', game.PlaceId, game.JobId)
+                setclipboard(script)
+                Notifications:Create({Name = "Join script copied to clipboard!"}) 
+            end})
+
+            ServerSection:Button({Name = "Join Lowest Server", Callback = function() 
+                Notifications:Create({Name = "Finding lowest player server..."}) 
+                local PlaceId = game.PlaceId
+                local Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100')
+                local body = game:GetService('HttpService'):JSONDecode(Site)
+                local lowest = nil
+                local lowestPlayers = math.huge
+                
+                if body.data then
+                    for i,v in pairs(body.data) do
+                        if type(v) == "table" and v.maxPlayers and v.playing and v.id ~= game.JobId then
+                            if v.playing < lowestPlayers then
+                                lowestPlayers = v.playing
+                                lowest = v.id
+                            end
+                        end
+                    end
+                end
+                
+                if lowest then
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceId, lowest, game:GetService("Players").LocalPlayer)
+                else
+                    Notifications:Create({Name = "No suitable servers found!"}) 
+                end
+            end})
+
             local Section = Tab:Section({Name = "Other", Side = "Right"})
             Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
-            Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
             Section:Toggle({Name = "Toggle Status", Flag = "Status", Callback = window.ToggleStatus})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
