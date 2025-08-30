@@ -1279,6 +1279,46 @@
                         BackgroundColor3 = themes.preset.accent
                     }); Library:Themify(Items.Accent, "accent", "BackgroundColor3")
 
+                    -- Add gradient stroke effect to accent line
+                    local accentGradient = Library:Create("UIGradient", {
+                        Parent = Items.Accent,
+                        Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 200, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                        }),
+                        Rotation = 45
+                    })
+
+                    local accentStroke = Library:Create("UIStroke", {
+                        Parent = Items.Accent,
+                        Color = Color3.fromRGB(255, 255, 255),
+                        Thickness = 1,
+                        Transparency = 0.3
+                    })
+
+                    local accentStrokeGradient = Library:Create("UIGradient", {
+                        Parent = accentStroke,
+                        Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 150, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                        }),
+                        Rotation = 45
+                    })
+
+                    -- Animate the accent line gradient
+                    spawn(function()
+                        while Items.Accent and Items.Accent.Parent do
+                            for i = 0, 360, 2 do
+                                if not Items.Accent or not Items.Accent.Parent then break end
+                                accentGradient.Rotation = i
+                                accentStrokeGradient.Rotation = i + 15
+                                wait(0.05)
+                            end
+                        end
+                    end)
+
                     -- Add waving gradient effect like watermark
                     Items.AccentLineFade = Library:Create( "Frame" , {
                         Parent = Items.List;
