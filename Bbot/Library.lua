@@ -4870,8 +4870,6 @@
             Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
             Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
             Section:Toggle({Name = "Toggle Status", Flag = "Status", Callback = window.ToggleStatus})
-            Section:Textbox({Name = "Custom Menu Name", Callback = window.ChangeTitle, Default = window.Name, Placeholder = "Title name here..."})
-            Section:Textbox({Name = "Custom Watermark Name", Callback = window.ChangeWatermarkTitle, Default = "vert$!.lua", Placeholder = "Title name here..."})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
             end});
