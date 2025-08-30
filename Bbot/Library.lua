@@ -1439,7 +1439,7 @@ local success, result = pcall(function()
             pcall(function()
                 local HttpService = game:GetService("HttpService")
 
-                local githubRepo = "vertb1/Bbot" -- Your GitHub repository
+                local githubRepo = "vertb1/Libraries" -- Your GitHub repository
                 local apiUrl = "https://api.github.com/repos/" .. githubRepo .. "/commits?per_page=1"
                 
                 local success, response = pcall(function()
