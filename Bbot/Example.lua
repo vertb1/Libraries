@@ -1,6 +1,16 @@
 local Library, Notifications, Themes = loadstring(game:HttpGet("https://raw.githubusercontent.com/vertb1/Libraries/refs/heads/main/Bbot/Library.lua"))()
 
-local Window = Library:Window({name = "nebula"})
+-- Services
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+local Window = Library:Window({name = "vert$!"})
 
 local Tabs = {
     Combat = Window:Tab({Name = "Combat"}),
