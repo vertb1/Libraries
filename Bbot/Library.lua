@@ -2060,6 +2060,18 @@
                     end
                 end)
             end
+
+            -- Auto-load config if one is set
+            spawn(function()
+                wait(1) -- Wait a bit for everything to initialize
+                if isfile(Library.Directory .. "/autoload.txt") then
+                    local autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
+                    if isfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg") then
+                        Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg"))
+                        Notifications:Create({Name = "Auto-loaded config: " .. autoLoadConfig})
+                    end
+                end
+            end)
             
             return setmetatable(Cfg, Library)
         end 
@@ -4847,6 +4859,59 @@
                 delfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg")  
                 Library:UpdateConfigList() 
                 Notifications:Create({Name = "Deleted Config (" ..  Library.Directory .. "/configs/" .. ConfigText .. ".cfg" .. ")"}) 
+            end})
+
+            Section:Button({Name = "Overwrite Config", Callback = function() 
+                if ConfigText and ConfigText ~= "" then
+                    if isfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg") then
+                        writefile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg", Library:GetConfig())
+                        Notifications:Create({Name = "Overwritten Config: " .. ConfigText}) 
+                    else
+                        Notifications:Create({Name = "Config doesn't exist: " .. ConfigText}) 
+                    end
+                else
+                    Notifications:Create({Name = "Please enter a config name first!"}) 
+                end
+            end})
+
+            -- Auto load status display
+            local AutoLoadText = Section:Label({Name = "Auto Load: None"})
+            
+            -- Function to update auto load display
+            local function UpdateAutoLoadDisplay()
+                if isfile(Library.Directory .. "/autoload.txt") then
+                    local autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
+                    AutoLoadText.Set("Auto Load: " .. autoLoadConfig)
+                else
+                    AutoLoadText.Set("Auto Load: None")
+                end
+            end
+            
+            -- Update display initially
+            UpdateAutoLoadDisplay()
+
+            Section:Button({Name = "Set as Auto Load", Callback = function() 
+                if ConfigText and ConfigText ~= "" then
+                    if isfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg") then
+                        writefile(Library.Directory .. "/autoload.txt", ConfigText)
+                        Notifications:Create({Name = "Set " .. ConfigText .. " as auto load config."}) 
+                        UpdateAutoLoadDisplay()
+                    else
+                        Notifications:Create({Name = "Config doesn't exist: " .. ConfigText}) 
+                    end
+                else
+                    Notifications:Create({Name = "Please enter a config name first!"}) 
+                end
+            end})
+
+            Section:Button({Name = "Remove Auto Load", Callback = function() 
+                if isfile(Library.Directory .. "/autoload.txt") then
+                    delfile(Library.Directory .. "/autoload.txt")
+                    Notifications:Create({Name = "Removed auto load config."}) 
+                    UpdateAutoLoadDisplay()
+                else
+                    Notifications:Create({Name = "No auto load config set."}) 
+                end
             end})
 
             Section:Button({Name = "Unload Library", Callback = function() 
