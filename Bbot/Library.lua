@@ -2048,6 +2048,21 @@ local success, result = pcall(function()
             -- Live watermark updating
             do
                 Cfg.WatermarkBaseName = "vert$!.lua" -- Default base name
+                local gameName = "Unknown Game"
+                
+                -- Get game name
+                pcall(function()
+                    local MarketplaceService = game:GetService("MarketplaceService")
+                    local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+                    if gameInfo and gameInfo.Name then
+                        gameName = gameInfo.Name
+                        -- Truncate if too long
+                        if #gameName > 20 then
+                            gameName = string.sub(gameName, 1, 17) .. "..."
+                        end
+                    end
+                end)
+                
                 local lastUpdate = 0
                 Library:Connection(RunService.Heartbeat, function()
                     local currentTime = tick()
@@ -2057,7 +2072,7 @@ local success, result = pcall(function()
                         local dateStr = os.date("%m/%d/%Y")
                         local timeStr = os.date("%H:%M:%S")
                         local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-                        Items.WatermarkTitle.Text = string.format("%s | %s | %s | %sms", Cfg.WatermarkBaseName, dateStr, timeStr, ping)
+                        Items.WatermarkTitle.Text = string.format("%s | %s | %s | %s | %sms", Cfg.WatermarkBaseName, gameName, dateStr, timeStr, ping)
                     end
                 end)
             end
