@@ -1279,24 +1279,6 @@
                         BackgroundColor3 = themes.preset.accent
                     }); Library:Themify(Items.Accent, "accent", "BackgroundColor3")
 
-                    -- Add waving gradient effect like watermark
-                    Items.AccentLineFade = Library:Create( "Frame" , {
-                        Parent = Items.List;
-                        Size = dim2(1, -3, 0, 1);
-                        Name = "\0";
-                        Position = dim2(0, 2, 0, 2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        ZIndex = 3;
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.accent
-                    }); Library:Themify(Items.AccentLineFade, "accent", "BackgroundColor3")
-                    
-                    Items.FadingGradient = Library:Create( "UIGradient" , {
-                        Offset = vec2(0, 0);
-                        Transparency = numseq{numkey(0, 0), numkey(0.5, 1), numkey(1, 0)};
-                        Parent = Items.AccentLineFade
-                    });
-
                     Library:Create( "UIPadding", {
                         PaddingRight = dim(0, 2);
                         Parent = Items.Inline
@@ -1330,19 +1312,17 @@
             end 
 
             Items.List:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-                Items.Holder.Position = Items.List.Position + dim_offset(0, 20)
+                Items.Holder.Position = Items.List.Position + dim_offset(0, 23)
                 Items.List.Size = dim2(0, math.max(0, Items.Holder.AbsoluteSize.X, 120), 0, 20)
             end)
 
             Items.Holder:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
                 Items.List.Size = dim2(0, math.max(0, Items.Holder.AbsoluteSize.X, 120), 0, 20)
-                Items.Holder.Position = Items.List.Position + dim_offset(0, 20)
+                Items.Holder.Position = Items.List.Position + dim_offset(0, 23)
             end)
 
             task.delay(0.01, function()
                 Items.List.Position = dim2(0, 50, 0, 100);
-                Items.Holder.Position = Items.List.Position + dim_offset(0, 20)
-                Items.List.Size = dim2(0, math.max(0, Items.Holder.AbsoluteSize.X, 120), 0, 20)
             end)
             
             return setmetatable(Cfg, Library)
@@ -5053,13 +5033,11 @@
                     Window.SetVisible(bool) 
                 end})
                 
-                -- Force menu bind to appear in keybind list
-                task.spawn(function()
-                    wait(0.5) -- Wait for everything to initialize
-                    if Library and Library.KeybindList then
-                        local menuKeybindElement = Library.KeybindList:ListElement({})
-                        menuKeybindElement.SetText("Menu Bind [INS] - Toggle")
-                        menuKeybindElement.SetVisible(true)
+                -- Automatically show menu bind in keybind list
+                spawn(function()
+                    wait(0.1)
+                    if Flags then
+                        Flags["MenuBind_LIST"] = true
                     end
                 end)
                 Window.Tweening = false
