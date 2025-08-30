@@ -2050,13 +2050,13 @@
                 local lastUpdate = 0
                 Library:Connection(RunService.Heartbeat, function()
                     local currentTime = tick()
-                    -- Update every 100ms for smooth millisecond display
-                    if currentTime - lastUpdate >= 0.1 then
+                    -- Update every 500ms for performance
+                    if currentTime - lastUpdate >= 0.5 then
                         lastUpdate = currentTime
                         local dateStr = os.date("%m/%d/%Y")
                         local timeStr = os.date("%H:%M:%S")
-                        local ms = math.floor((currentTime % 1) * 1000)
-                        Items.WatermarkTitle.Text = string.format("%s | %s | %s:%03d", Cfg.WatermarkBaseName, dateStr, timeStr, ms)
+                        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+                        Items.WatermarkTitle.Text = string.format("%s | %s | %s | %sms", Cfg.WatermarkBaseName, dateStr, timeStr, ping)
                     end
                 end)
             end
