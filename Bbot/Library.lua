@@ -2040,11 +2040,6 @@ local success, result = pcall(function()
                 Cfg.WatermarkBaseName = text or "vert$!.lua"
             end
 
-            function Cfg.ToggleStatus(bool) 
-                Items.Activity.Visible = bool
-                Items.ActivityLine.Visible = bool
-            end
-
             function Cfg.ToggleKeybindList(bool)
                 Items.Keybind_List.Visible = bool
                 print(bool)
@@ -5011,7 +5006,7 @@ local success, result = pcall(function()
 
             local Section = Tab:Section({Name = "Other", Side = "Right"})
             Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
-            Section:Toggle({Name = "Toggle Status", Flag = "Status", Callback = window.ToggleStatus})
+            Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
             end});
