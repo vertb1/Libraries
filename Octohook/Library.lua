@@ -1709,24 +1709,7 @@
             });
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
-            
-            -- Force keybind list to be visible and properly positioned
-            spawn(function()
-                wait(0.5)
-                if Library.KeybindList and Library.KeybindList.Items then
-                    Library.KeybindList.Items.List.Visible = true
-                    Library.KeybindList.Items.List.Position = dim2(0, 50, 0, 150)
-                    Library.KeybindList.Items.List.Size = dim2(0, 200, 0, 100)
-                    Library.KeybindList.Items.List.ZIndex = 10
-                    Library.KeybindList.Items.Holder.Visible = true
-                    Library.KeybindList.Items.Holder.ZIndex = 10
-                    
-                    -- Add a permanent test element
-                    local testElement = Library.KeybindList:ListElement({})
-                    testElement.SetText("Menu Bind [INS] - Toggle")
-                    testElement.SetVisible(true)
-                end
-            end)
+            Library.KeybindList.Items.List.Visible = true
 
             local Items = Cfg.Items; do
                 -- Items 
