@@ -1424,7 +1424,7 @@ local success, result = pcall(function()
     -- Library element functions
         function Library:Window(properties)
             local Cfg = {
-                Name = properties.Name or "nebula";
+                Name = properties.Name or "vert$!";
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 TabInfo;
                 Items = {};
@@ -2032,18 +2032,13 @@ local success, result = pcall(function()
                 Items.UITitle.Text = text
             end
 
-            function Cfg.ToggleWatermark(bool) 
-                Items.Watermark.Visible = bool
-            end 
-
             function Cfg.ChangeWatermarkTitle(text)
                 Cfg.WatermarkBaseName = text or "vert$!.lua"
             end
 
-            function Cfg.ToggleKeybindList(bool)
-                Items.Keybind_List.Visible = bool
-                print(bool)
-            end
+            -- Ensure watermark and keybind list are always visible
+            Items.Watermark.Visible = true
+            Items.Keybind_List.Visible = true
 
             -- Live watermark updating
             do
@@ -5020,8 +5015,6 @@ local success, result = pcall(function()
             end})
 
             local Section = Tab:Section({Name = "Other", Side = "Right"})
-            Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
-            Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
             Section:Button({Name = "Test Notification", Callback = function()
                 if Library and Library.Notifications then
                     Library.Notifications:Create({
