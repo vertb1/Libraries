@@ -1249,6 +1249,18 @@ local success, result = pcall(function()
         function Library:GetConfig()
             local Config = {}
             
+            -- Debug: print what's in Flags
+            print("=== DEBUG: Flags table contents ===")
+            for Idx, Value in pairs(Flags) do
+                print("Flag:", Idx, "Type:", type(Value), "Value:", Value)
+                if type(Value) == "table" then
+                    for k, v in pairs(Value) do
+                        print("  Table key:", k, "value:", v)
+                    end
+                end
+            end
+            print("=== END DEBUG ===")
+            
             for Idx, Value in Flags do
                 if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
                     -- Handle colorpickers
@@ -1272,6 +1284,21 @@ local success, result = pcall(function()
         function Library:LoadConfig(JSON) 
             local Config = HttpService:JSONDecode(JSON)
             
+            -- Debug: print what's in the loaded config
+            print("=== DEBUG: LoadConfig contents ===")
+            for Idx, Value in pairs(Config) do
+                print("Config key:", Idx, "Type:", type(Value), "Value:", Value)
+                if type(Value) == "table" then
+                    for k, v in pairs(Value) do
+                        print("  Table key:", k, "value:", v)
+                    end
+                end
+                
+                local Function = ConfigFlags[Idx]
+                print("ConfigFlags function for", Idx, ":", Function ~= nil and "EXISTS" or "MISSING")
+            end
+            print("=== END LoadConfig DEBUG ===")
+            
             for Idx, Value in Config do                
                 if Idx == "config_name_list" then 
                     continue 
@@ -1290,6 +1317,8 @@ local success, result = pcall(function()
                         -- Handle regular values (toggles, sliders, dropdowns, etc.)
                         Function(Value)
                     end
+                else
+                    print("WARNING: No ConfigFlags function found for:", Idx)
                 end 
             end 
         end 
