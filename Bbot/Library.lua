@@ -1,6 +1,12 @@
 -- Probably my newest code up to date thats available publicly. 
 -- Made around march - april 2025
 
+-- Start load timer
+local loadStartTime = tick()
+
+-- Protected library loading
+local success, result = pcall(function()
+
 -- Variables 
     -- Services
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
@@ -5214,4 +5220,46 @@
     --
 -- 
 
+-- Show load success notification
+pcall(function()
+    local loadTime = tick() - loadStartTime
+    local loadTimeMs = math.floor(loadTime * 1000)
+    
+    -- Wait a moment for everything to initialize
+    task.wait(0.5)
+    
+    if Notifications and Notifications.Create then
+        Notifications:Create({
+            Name = string.format("Successfully loaded modules in %dms", loadTimeMs),
+            Lifetime = 8
+        })
+    end
+end)
+
 return Library, Notifications, themes
+
+end) -- End of pcall
+
+-- Handle loading result
+if success then
+    -- Library loaded successfully, return the result
+    return result
+else
+    -- Library failed to load
+    local loadTime = tick() - loadStartTime
+    local loadTimeMs = math.floor(loadTime * 1000)
+    
+    warn("vert$! Library failed to load: " .. tostring(result))
+    
+    -- Try to show error notification if possible
+    pcall(function()
+        if getgenv().Library and getgenv().Library.Notifications then
+            getgenv().Library.Notifications:Create({
+                Name = string.format("Failed to load modules after %dms - Check console for details", loadTimeMs),
+                Lifetime = 8
+            })
+        end
+    end)
+    
+    return nil
+end
