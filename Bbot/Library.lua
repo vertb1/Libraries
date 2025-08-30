@@ -381,6 +381,7 @@ local success, result = pcall(function()
         local ConfigHolder;
         function Library:UpdateConfigList() 
             if not ConfigHolder then 
+                print("no exist :(")
                 return 
             end
             
@@ -390,6 +391,10 @@ local success, result = pcall(function()
                 local Name = file:gsub(Library.Directory .. "/configs\\", ""):gsub(".cfg", ""):gsub(Library.Directory .. "\\configs\\", "")
                 List[#List + 1] = Name
             end
+
+            for _,v in List do 
+                print(_,v)
+            end 
 
             ConfigHolder.RefreshOptions(List)
         end
@@ -1245,16 +1250,16 @@ local success, result = pcall(function()
             local Config = {}
             
             for Idx, Value in Flags do
-                if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
-                    -- Handle colorpickers
-                    Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
-                elseif type(Value) == "table" and ((Value.key or Value.Key) and (Value.mode or Value.Mode) and (Value.active ~= nil or Value.Active ~= nil)) then
-                    -- Handle keybinds - check for all three properties
+                if type(Value) == "table" and (Value.key or Value.Key) then
+                    -- Handle keybinds
                     Config[Idx] = {
-                        active = Value.active ~= nil and Value.active or Value.Active, 
+                        active = Value.active or Value.Active, 
                         mode = Value.mode or Value.Mode, 
                         key = tostring(Value.key or Value.Key)
                     }
+                elseif type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+                    -- Handle colorpickers
+                    Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
                 else
                     -- Handle regular values (toggles, sliders, dropdowns, etc.)
                     Config[Idx] = Value
@@ -1278,8 +1283,8 @@ local success, result = pcall(function()
                     if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
                         -- Handle colorpickers
                         Function(hex(Value["Color"]), Value["Transparency"])
-                    elseif type(Value) == "table" and ((Value["key"] or Value["Key"]) and (Value["mode"] or Value["Mode"]) and (Value["active"] ~= nil or Value["Active"] ~= nil)) then 
-                        -- Handle keybinds - check for all three properties
+                    elseif type(Value) == "table" and (Value["active"] or Value["Active"]) then 
+                        -- Handle keybinds
                         Function(Value)
                     else
                         -- Handle regular values (toggles, sliders, dropdowns, etc.)
@@ -3193,6 +3198,7 @@ local success, result = pcall(function()
                 end)
     
                 if not Cfg.TabInfo then
+                    print("new tab")
                     SubItems.Fill.Size = dim2(1, -2, 0, 1);
                     SubItems.TextPadding.PaddingRight = dim(0, 8);
                     Data.OpenTab()
@@ -4159,6 +4165,7 @@ local success, result = pcall(function()
 
             Library:Connection(InputService.InputBegan, function(input, game_event)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    print("clicked")
                     if (Items.DropdownElements.Visible) and not Library:Hovering({Items.DropdownElements, Items.Dropdown}) then
                         Cfg.SetVisible(false)
                         Cfg.Open = false
@@ -5221,6 +5228,7 @@ local success, result = pcall(function()
             Library:Tween(Items.Outline, {AnchorPoint = vec2(0, 0)})
             Library:Tween(Items.AccentLine, {Size = dim2(0, -2, 0, 1)}, TweenInfo.new(Cfg.Lifetime, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut, 0, false, 0))
 
+            print(Items.AccentLine.BackgroundTransparency)
             task.spawn(function()
                 task.wait(Cfg.Lifetime)
                 Notifications.Notifs[index] = nil
