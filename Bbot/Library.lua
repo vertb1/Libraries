@@ -1250,11 +1250,18 @@ local success, result = pcall(function()
             local Config = {}
             
             for Idx, Value in Flags do
-                if type(Value) == "table" and Value.key then
-                    Config[Idx] = {active = Value.Active, mode = Value.Mode, key = tostring(Value.Key)}
+                if type(Value) == "table" and (Value.key or Value.Key) then
+                    -- Handle keybinds
+                    Config[Idx] = {
+                        active = Value.active or Value.Active, 
+                        mode = Value.mode or Value.Mode, 
+                        key = tostring(Value.key or Value.Key)
+                    }
                 elseif type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+                    -- Handle colorpickers
                     Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
                 else
+                    -- Handle regular values (toggles, sliders, dropdowns, etc.)
                     Config[Idx] = Value
                 end
             end 
@@ -1274,10 +1281,13 @@ local success, result = pcall(function()
 
                 if Function then 
                     if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+                        -- Handle colorpickers
                         Function(hex(Value["Color"]), Value["Transparency"])
-                    elseif type(Value) == "table" and Value["Active"] then 
+                    elseif type(Value) == "table" and (Value["active"] or Value["Active"]) then 
+                        -- Handle keybinds
                         Function(Value)
                     else
+                        -- Handle regular values (toggles, sliders, dropdowns, etc.)
                         Function(Value)
                     end
                 end 
