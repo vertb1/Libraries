@@ -1250,16 +1250,16 @@ local success, result = pcall(function()
             local Config = {}
             
             for Idx, Value in Flags do
-                if type(Value) == "table" and (Value.key or Value.Key) then
-                    -- Handle keybinds
+                if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+                    -- Handle colorpickers
+                    Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
+                elseif type(Value) == "table" and ((Value.key or Value.Key) and (Value.mode or Value.Mode) and (Value.active ~= nil or Value.Active ~= nil)) then
+                    -- Handle keybinds - check for all three properties
                     Config[Idx] = {
-                        active = Value.active or Value.Active, 
+                        active = Value.active ~= nil and Value.active or Value.Active, 
                         mode = Value.mode or Value.Mode, 
                         key = tostring(Value.key or Value.Key)
                     }
-                elseif type(Value) == "table" and Value["Transparency"] and Value["Color"] then
-                    -- Handle colorpickers
-                    Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
                 else
                     -- Handle regular values (toggles, sliders, dropdowns, etc.)
                     Config[Idx] = Value
@@ -1283,8 +1283,8 @@ local success, result = pcall(function()
                     if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
                         -- Handle colorpickers
                         Function(hex(Value["Color"]), Value["Transparency"])
-                    elseif type(Value) == "table" and (Value["active"] or Value["Active"]) then 
-                        -- Handle keybinds
+                    elseif type(Value) == "table" and ((Value["key"] or Value["Key"]) and (Value["mode"] or Value["Mode"]) and (Value["active"] ~= nil or Value["Active"] ~= nil)) then 
+                        -- Handle keybinds - check for all three properties
                         Function(Value)
                     else
                         -- Handle regular values (toggles, sliders, dropdowns, etc.)
