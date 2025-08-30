@@ -1976,7 +1976,7 @@ local success, result = pcall(function()
                     Library:Create( "ImageLabel" , {
                         BorderColor3 = rgb(0, 0, 0);
                         Parent = Items.Watermark;
-                        Image = "rbxassetid://133601737414791";
+                        Image = "rbxassetid://87885077010705";
                         BackgroundTransparency = 1;
                         Position = dim2(0, 3, 0, 2);
                         Size = dim2(0, 11, 0, 15);
