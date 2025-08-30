@@ -1433,36 +1433,8 @@ local success, result = pcall(function()
     
     -- Library element functions
         function Library:Window(properties)
-            -- Try to fetch GitHub commit ID via API
-            local COMMIT_ID = "unknown"
-            
-            pcall(function()
-                local HttpService = game:GetService("HttpService")
-
-                local githubRepo = "vertb1/Libraries" -- Your GitHub repository
-                local apiUrl = "https://api.github.com/repos/" .. githubRepo .. "/commits?per_page=1"
-                
-                local success, response = pcall(function()
-                    return HttpService:GetAsync(apiUrl)
-                end)
-                
-                if success then
-                    local data = HttpService:JSONDecode(response)
-                    if data and data[1] and data[1].sha then
-                        COMMIT_ID = string.sub(data[1].sha, 1, 7) -- Get first 7 chars
-                        print("[vert$!] Successfully fetched commit ID: " .. COMMIT_ID)
-                    end
-                else
-                    -- Fallback to static commit ID if API fails
-                    COMMIT_ID = "11f9a4a"
-                    print("[vert$!] Failed to fetch commit ID, using fallback: " .. COMMIT_ID)
-                end
-            end)
-            
-            local windowName = properties.Name or ("vert$! (commit " .. COMMIT_ID .. ")")
-            
             local Cfg = {
-                Name = windowName;
+                Name = properties.Name or "vert$!";
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 TabInfo;
                 Items = {};
@@ -1987,7 +1959,7 @@ local success, result = pcall(function()
                         TextColor3 = rgb(239, 239, 239);
                         BorderColor3 = rgb(0, 0, 0);
                         RichText = true;
-                        Text = "vert$!.lua (commit " .. COMMIT_ID .. ")";
+                        Text = "vert$!.lua";
                         Parent = Items.Watermark;
                         Name = "\0";
                         BackgroundTransparency = 1;
@@ -2071,7 +2043,7 @@ local success, result = pcall(function()
             end
 
             function Cfg.ChangeWatermarkTitle(text)
-                Cfg.WatermarkBaseName = text or ("vert$!.lua (commit " .. COMMIT_ID .. ")")
+                Cfg.WatermarkBaseName = text or "vert$!.lua"
             end
 
             -- Ensure watermark and keybind list are always visible
@@ -2080,7 +2052,7 @@ local success, result = pcall(function()
 
             -- Live watermark updating
             do
-                Cfg.WatermarkBaseName = "vert$!.lua (commit " .. COMMIT_ID .. ")" -- Default base name
+                Cfg.WatermarkBaseName = "vert$!.lua" -- Default base name
                 local gameName = "Unknown Game"
                 
                 -- Get game name
