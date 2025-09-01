@@ -3,8 +3,16 @@ local library, themes = loadstring(game:HttpGet("https://raw.githubusercontent.c
 local dim2 = UDim2.new
 local hex = Color3.fromHex 
 
+-- Get game name from MarketplaceService
+local MarketplaceService = game:GetService("MarketplaceService")
+local gameName = "Unknown Game"
+pcall(function()
+	local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+	gameName = gameInfo.Name
+end)
+
 -- documentation 
-	local window = library:window({name = os.date('Atlanta |  - %b %d %Y'), size = dim2(0, 750, 0, 782)})
+	local window = library:window({name = os.date('vert$! | ' .. gameName .. ' - %b %d %Y'), size = dim2(0, 750, 0, 782)})
 
 	local Aiming = window:tab({name = "Aiming"})
 	local Misc = window:tab({name = "Misc"})
@@ -109,5 +117,4 @@ end
 task.wait()
 
 library.old_config = library:get_config()
-
 
