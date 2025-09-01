@@ -1,6 +1,25 @@
 -- REASON: Dumbass customer put their library in a request and flexed his non existant security and ended up getting it leaked by himself... 😭
 -- The code here is horrendous this is my 2nd library, the added on code was made to suit the old code however I should have just converted to a newer version of my code kind of an oopsie. 
 
+-- Prevent multiple UI instances
+if getgenv().vert_ui_loaded then
+	for _, gui in getgenv().vert_ui_guis or {} do
+		if gui and gui.Parent then
+			gui:Destroy()
+		end
+	end
+	for _, connection in getgenv().vert_ui_connections or {} do
+		if connection and connection.Connected then
+			connection:Disconnect()
+		end
+	end
+	getgenv().vert_ui_guis = {}
+	getgenv().vert_ui_connections = {}
+end
+getgenv().vert_ui_loaded = true
+getgenv().vert_ui_guis = getgenv().vert_ui_guis or {}
+getgenv().vert_ui_connections = getgenv().vert_ui_connections or {}
+
 -- variables
 	local uis = cloneref(game:GetService("UserInputService"))
 	local players = cloneref(game:GetService("Players"))
@@ -550,6 +569,7 @@
 			local connection = signal:Connect(callback)
 			
 			insert(library.connections, connection)
+			insert(getgenv().vert_ui_connections, connection)
 
 			return connection 
 		end
@@ -576,6 +596,7 @@
 				library:apply_stroke(ins)
 			elseif instance == "ScreenGui" then 
 				insert(library.guis, ins)
+				insert(getgenv().vert_ui_guis, ins)
 			end
 			
 			return ins 
@@ -1664,13 +1685,12 @@
 					image = "rbxassetid://115194686863276",
 				})
 
-				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S') .. string.format(".%03d", math.floor((tick() % 1) * 1000))})  
+				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S') .. " | " .. math.floor(stats.Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms"})  
 
 				task.spawn(function()
-					while task.wait() do -- Changed to task.wait() without parameter for faster updates
-						local current_time = tick()
-						local milliseconds = math.floor((current_time % 1) * 1000)
-						watermark.change_text(os.date('vert$! - Beta - %b %d %Y - %H:%M:%S') .. string.format(".%03d", milliseconds))
+					while task.wait(0.1) do -- Update every 100ms for smoother ping updates
+						local ping = math.floor(stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+						watermark.change_text(os.date('vert$! - Beta - %b %d %Y - %H:%M:%S') .. " | " .. ping .. "ms")
 					end 
 				end) 
 
