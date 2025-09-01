@@ -1679,16 +1679,9 @@ local load_start_time = tick()
 				library:make_resizable(items.main_holder) 
 			-- 
 
-			-- theming 
-				local style = library:panel({
-					name = "Style", 
-					anchor_point = vec2(0, 0),
-					size = dim2(0, 394, 0, 464),
-					position = dim2(0, main_window.items.main_holder.AbsolutePosition.X + main_window.items.main_holder.AbsoluteSize.X + 2, 0, main_window.items.main_holder.AbsolutePosition.Y),
-					image = "rbxassetid://115194686863276",
-				})
-
+			-- Create watermark and keybind list (always visible)
 				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S') .. " | " .. math.floor(stats.Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms"})  
+				watermark.set_visible(true) -- Always visible
 
 				task.spawn(function()
 					while task.wait(0.1) do -- Update every 100ms for smoother ping updates
@@ -1697,15 +1690,18 @@ local load_start_time = tick()
 					end 
 				end) 
 
-				local items = style.items
+				-- Make keybind list always visible
+				library.keybind_list_frame.Visible = true
 
-				local column = setmetatable(items, library):column() 
-				local section = column:section({name = "Theme"})
-				section:label({name = "Accent"})
+				-- Create Style tab
+				local style_tab = window:tab({name = "Style"})
+				local style_column = style_tab:column()
+				local theme_section = style_column:section({name = "Theme"})
+				theme_section:label({name = "Accent"})
 				:colorpicker({name = "Accent", color = themes.preset.accent, flag = "accent", callback = function(color, alpha)
 					library:update_theme("accent", color)
 				end, flag = "Accent"})
-				section:label({name = "Contrast"})
+				theme_section:label({name = "Contrast"})
 				:colorpicker({name = "Low", color = themes.preset.low_contrast, flag = "low_contrast", callback = function(color)
 					if (flags["high_contrast"] and flags["low_contrast"]) then 
 						library:update_theme("contrast", rgbseq{
@@ -1724,57 +1720,51 @@ local load_start_time = tick()
 
 					library:update_theme("high_contrast", flags["high_contrast"].Color)
 				end})
-				section:label({name = "Inline"})
+				theme_section:label({name = "Inline"})
 				:colorpicker({name = "Inline", color = themes.preset.inline, callback = function(color, alpha)
 					library:update_theme("inline", color)
 				end, flag = "Inline"})
-				section:label({name = "Outline"})
+				theme_section:label({name = "Outline"})
 				:colorpicker({name = "Outline", color = themes.preset.outline, callback = function(color, alpha)
 					library:update_theme("outline", color)
 				end, flag = "Outline"})
-				section:label({name = "Text Color"})
+				theme_section:label({name = "Text Color"})
 				:colorpicker({name = "Main", color = themes.preset.text, callback = function(color, alpha)
 					library:update_theme("text", color)
 				end, flag = "Main"})
 				:colorpicker({name = "Outline", color = themes.preset.text_outline, callback = function(color, alpha)
 					library:update_theme("text_outline", color)
 				end, flag = "Outline"})
-				section:label({name = "Glow"})
+				theme_section:label({name = "Glow"})
 				:colorpicker({name = "Glow", color = themes.preset.glow, callback = function(color, alpha)
 					library:update_theme("glow", color)
 				end, flag = "Glow"})
-				section:slider({name = "Blur Size", flag = "Blur Size", min = 0, max = 56, default = 15, interval = 1, callback = function(int)
+				theme_section:slider({name = "Blur Size", flag = "Blur Size", min = 0, max = 56, default = 15, interval = 1, callback = function(int)
 					if window.opened then 
 						blur.Size = int
 					end
 				end})
-				local section = column:section({name = "Other"})
-				section:label({name = "UI Bind"})
+				local other_section = style_column:section({name = "Other"})
+				other_section:label({name = "UI Bind"})
 				:keybind({callback = window.set_menu_visibility, key = Enum.KeyCode.Insert})
-				section:toggle({name = "Keybind List", flag = "keybind_list", callback = function(bool)
-					library.keybind_list_frame.Visible = bool
-				end})
-				section:toggle({name = "Watermark", flag = "watermark", callback = function(bool)
-					watermark.set_visible(bool)
-				end})
-				section:button_holder({})
-				section:button({name = "Copy JobId", callback = function()
+				other_section:button_holder({})
+				other_section:button({name = "Copy JobId", callback = function()
 					setclipboard(game.JobId)
 				end})
-				section:button_holder({})
-				section:button({name = "Copy GameID", callback = function()
+				other_section:button_holder({})
+				other_section:button({name = "Copy GameID", callback = function()
 					setclipboard(game.GameId)
 				end})
-				section:button_holder({})
-				section:button({name = "Copy Join Script", callback = function()
+				other_section:button_holder({})
+				other_section:button({name = "Copy Join Script", callback = function()
 					setclipboard('game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)')
 				end})
-				section:button_holder({})
-				section:button({name = "Rejoin", callback = function()
+				other_section:button_holder({})
+				other_section:button({name = "Rejoin", callback = function()
 					game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
 				end})
-				section:button_holder({})
-				section:button({name = "Join New Server", callback = function()
+				other_section:button_holder({})
+				other_section:button({name = "Join New Server", callback = function()
 					local apiRequest = game:GetService("HttpService"):JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
 					local data = apiRequest.data[random(1, #apiRequest.data)]
 						
@@ -1782,27 +1772,19 @@ local load_start_time = tick()
 						game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, data.id)
 					end 
 				end})
-				section:slider({name = "Max Players", flag = "max_players", min = 0, max = 40, default = 15, interval = 1})
-			-- 
+				other_section:slider({name = "Max Players", flag = "max_players", min = 0, max = 40, default = 15, interval = 1})
 
-			-- cfg holder
-				local holder = library:panel({
-					name = "Configurations", 
-					size = dim2(0, 324, 0, 410),
-					position = dim2(0, items.main_holder.AbsolutePosition.X + items.main_holder.AbsoluteSize.X + 2, 0, items.main_holder.AbsolutePosition.Y),
-					image = "rbxassetid://105199726008012",
-				}) 
-
-				local items = holder.items
+				-- Create Configurations tab
+				local config_tab = window:tab({name = "Configurations"})
 
 				getgenv().load_config = function(name)
 					library:load_config(readfile(library.directory .. "/configs/" .. name .. ".cfg"))
 				end 
 
-				local column = setmetatable(items, library):column() 
-				local section = column:section({name = "Options"})
+				local config_column = config_tab:column()
+				local config_section = config_column:section({name = "Options"})
 					-- Auto-load status label
-					local auto_load_label = section:label({name = "Auto Load: None"})
+					local auto_load_label = config_section:label({name = "Auto Load: None"})
 					
 					-- Update auto-load label function
 					local function update_auto_load_label()
@@ -1813,15 +1795,15 @@ local load_start_time = tick()
 					-- Initialize auto-load label
 					update_auto_load_label()
 					
-					config_holder = section:list({flag = "config_name_list"})
-					section:textbox({flag = "config_name_text_box"})
-					section:button_holder({})
-					section:button({name = "Create", callback = function()
+					config_holder = config_section:list({flag = "config_name_list"})
+					config_section:textbox({flag = "config_name_text_box"})
+					config_section:button_holder({})
+					config_section:button({name = "Create", callback = function()
 						writefile(library.directory .. "/configs/" .. flags["config_name_text_box"] .. ".cfg", library:get_config())
 						library:config_list_update()
 						library:notification({text = "Created Config: " .. flags["config_name_text_box"], time = 3})
 					end})
-					section:button({name = "Delete", callback = function()
+					config_section:button({name = "Delete", callback = function()
 						if flags["config_name_list"] then
 							-- Clear auto-load if deleting the auto-load config
 							if library.auto_load_config == flags["config_name_list"] then
@@ -1833,49 +1815,49 @@ local load_start_time = tick()
 							library:notification({text = "Deleted Config: " .. flags["config_name_list"], time = 3})
 						end
 					end})
-					section:button_holder({})
-					section:button({name = "Load", callback = function()
+					config_section:button_holder({})
+					config_section:button({name = "Load", callback = function()
 						if flags["config_name_list"] then
 							library:load_config(readfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"))
 							library:notification({text = "Loaded Config: " .. flags["config_name_list"], time = 3})
 						end
 					end})
-					section:button({name = "Save", callback = function()
+					config_section:button({name = "Save", callback = function()
 						if flags["config_name_list"] then
 							writefile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg", library:get_config())
 							library:config_list_update()
 							library:notification({text = "Saved Config: " .. flags["config_name_list"], time = 3})
 						end
 					end})
-					section:button_holder({})
-					section:button({name = "Overwrite Config", callback = function()
+					config_section:button_holder({})
+					config_section:button({name = "Overwrite Config", callback = function()
 						if flags["config_name_list"] and flags["config_name_list"] ~= "" then
 							writefile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg", library:get_config())
 							library:notification({text = "Overwrote Config: " .. flags["config_name_list"], time = 3})
 						end
 					end})
-					section:button({name = "Set as Auto Load", callback = function()
+					config_section:button({name = "Set as Auto Load", callback = function()
 						if flags["config_name_list"] and flags["config_name_list"] ~= "" then
 							library:set_auto_load(flags["config_name_list"])
 							update_auto_load_label()
 							library:notification({text = "Set Auto Load: " .. flags["config_name_list"], time = 3})
 						end
 					end})
-					section:button_holder({})
-					section:button({name = "Clear Auto Load", callback = function()
+					config_section:button_holder({})
+					config_section:button({name = "Clear Auto Load", callback = function()
 						library:clear_auto_load()
 						update_auto_load_label()
 						library:notification({text = "Cleared Auto Load", time = 3})
 					end})
-					section:button({name = "Refresh Configs", callback = function()
+					config_section:button({name = "Refresh Configs", callback = function()
 						library:config_list_update()
 					end})
-					section:button_holder({})
-					section:button({name = "Unload Config", callback = function()
+					config_section:button_holder({})
+					config_section:button({name = "Unload Config", callback = function()
 						library:load_config(library.old_config)
 						library:notification({text = "Unloaded Current Config", time = 3})
 					end})
-					section:button({name = "Unload Menu", callback = function()
+					config_section:button({name = "Unload Menu", callback = function()
 						library:load_config(library.old_config)
 
 						for _, gui in library.guis do 
@@ -1888,41 +1870,7 @@ local load_start_time = tick()
 
 						blur:Destroy()
 					end})
-			-- 
-					
-			-- esp preview
-				local holder = library:panel({
-					name = "ESP Preview", 
-					anchor_point = vec2(0, 0),
-					size = dim2(0, 300, 0, 325),
-					position = dim2(0, style.items.main_holder.AbsolutePosition.X, 0, style.items.main_holder.AbsolutePosition.Y + style.items.main_holder.AbsoluteSize.Y + 2),
-					image = "rbxassetid://77684377836328",
-				})  
-				
-				local items = holder.items
-				
-				local column = setmetatable(items, library):column() 
-				window.esp_section = column:section({name = "Main"})
-			--  
-
-			-- playerlist 
-				local holder = library:panel({
-					name = "Playerlist", 
-					anchor_point = vec2(0, 0),
-					size = dim2(0, 529, 0, 445),
-					position = dim2(0, main_window.items.main_holder.AbsolutePosition.X - 531, 0, main_window.items.main_holder.AbsolutePosition.Y),
-					image = "rbxassetid://107070078834415",
-				})  
-				
-				local items = holder.items
-
-				local column = setmetatable(items, library):column() 
-				local section = column:section({name = "Playerlist"})
-				local playerlist = section:playerlist({})
-				section:dropdown({name = "Priority", items = {"Enemy", "Priority", "Neutral", "Friendly"}, default = "Neutral", flag = "PLAYERLIST_DROPDOWN", callback = function(text)
-					library.prioritize(text)
-				end})
-			--  
+			--   
 
 			return setmetatable(window, library)
 		end
