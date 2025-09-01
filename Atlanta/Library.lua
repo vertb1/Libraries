@@ -82,6 +82,7 @@
 		connections = {},   
 		notifications = {},
 		playerlist_data = {},
+		auto_load_config = nil,
 
 		current_tab, 
 		current_element_open, 
@@ -491,6 +492,36 @@
 				end 
 			end 
 		end 
+
+		function library:set_auto_load(config_name)
+			library.auto_load_config = config_name
+			writefile(library.directory .. "/auto_load.txt", config_name)
+		end
+
+		function library:get_auto_load()
+			if isfile(library.directory .. "/auto_load.txt") then
+				library.auto_load_config = readfile(library.directory .. "/auto_load.txt")
+				return library.auto_load_config
+			end
+			return nil
+		end
+
+		function library:clear_auto_load()
+			library.auto_load_config = nil
+			if isfile(library.directory .. "/auto_load.txt") then
+				delfile(library.directory .. "/auto_load.txt")
+			end
+		end
+
+		function library:execute_auto_load()
+			local auto_config = library:get_auto_load()
+			if auto_config and isfile(library.directory .. "/configs/" .. auto_config .. ".cfg") then
+				library:load_config(readfile(library.directory .. "/configs/" .. auto_config .. ".cfg"))
+				library:notification({text = "Auto-loaded Config: " .. auto_config, time = 3})
+				return true
+			end
+			return false
+		end
 		
 		function library:round(number, float) 
 			local multiplier = 1 / (float or 1)
@@ -1745,34 +1776,79 @@
 
 				local column = setmetatable(items, library):column() 
 				local section = column:section({name = "Options"})
+					-- Auto-load status label
+					local auto_load_label = section:label({name = "Auto Load: None"})
+					
+					-- Update auto-load label function
+					local function update_auto_load_label()
+						local auto_config = library:get_auto_load()
+						auto_load_label.set(auto_config and ("Auto Load: " .. auto_config) or "Auto Load: None")
+					end
+					
+					-- Initialize auto-load label
+					update_auto_load_label()
+					
 					config_holder = section:list({flag = "config_name_list"})
 					section:textbox({flag = "config_name_text_box"})
 					section:button_holder({})
 					section:button({name = "Create", callback = function()
 						writefile(library.directory .. "/configs/" .. flags["config_name_text_box"] .. ".cfg", library:get_config())
 						library:config_list_update()
+						library:notification({text = "Created Config: " .. flags["config_name_text_box"], time = 3})
 					end})
 					section:button({name = "Delete", callback = function()
-						delfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg")
-						library:config_list_update()
+						if flags["config_name_list"] then
+							-- Clear auto-load if deleting the auto-load config
+							if library.auto_load_config == flags["config_name_list"] then
+								library:clear_auto_load()
+								update_auto_load_label()
+							end
+							delfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg")
+							library:config_list_update()
+							library:notification({text = "Deleted Config: " .. flags["config_name_list"], time = 3})
+						end
 					end})
 					section:button_holder({})
 					section:button({name = "Load", callback = function()
-						library:load_config(readfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"))
-						library:notification({text = "Loaded Config: " .. flags["config_name_list"], time = 3})
+						if flags["config_name_list"] then
+							library:load_config(readfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"))
+							library:notification({text = "Loaded Config: " .. flags["config_name_list"], time = 3})
+						end
 					end})
 					section:button({name = "Save", callback = function()
-						writefile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg", library:get_config())
-						library:config_list_update()
-						library:notification({text = "Saved Config: " .. flags["config_name_list"], time = 3})
+						if flags["config_name_list"] then
+							writefile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg", library:get_config())
+							library:config_list_update()
+							library:notification({text = "Saved Config: " .. flags["config_name_list"], time = 3})
+						end
 					end})
 					section:button_holder({})
+					section:button({name = "Overwrite Config", callback = function()
+						if flags["config_name_list"] and flags["config_name_list"] ~= "" then
+							writefile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg", library:get_config())
+							library:notification({text = "Overwrote Config: " .. flags["config_name_list"], time = 3})
+						end
+					end})
+					section:button({name = "Set as Auto Load", callback = function()
+						if flags["config_name_list"] and flags["config_name_list"] ~= "" then
+							library:set_auto_load(flags["config_name_list"])
+							update_auto_load_label()
+							library:notification({text = "Set Auto Load: " .. flags["config_name_list"], time = 3})
+						end
+					end})
+					section:button_holder({})
+					section:button({name = "Clear Auto Load", callback = function()
+						library:clear_auto_load()
+						update_auto_load_label()
+						library:notification({text = "Cleared Auto Load", time = 3})
+					end})
 					section:button({name = "Refresh Configs", callback = function()
 						library:config_list_update()
 					end})
 					section:button_holder({})
 					section:button({name = "Unload Config", callback = function()
 						library:load_config(library.old_config)
+						library:notification({text = "Unloaded Current Config", time = 3})
 					end})
 					section:button({name = "Unload Menu", callback = function()
 						library:load_config(library.old_config)
@@ -5926,5 +6002,11 @@
 		end 
 	-- 
 -- 
+
+-- Auto-load config on library initialization
+task.spawn(function()
+	task.wait(1) -- Wait a moment for everything to initialize
+	library:execute_auto_load()
+end)
 
 return library, themes; 
