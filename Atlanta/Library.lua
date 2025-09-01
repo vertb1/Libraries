@@ -1664,11 +1664,13 @@
 					image = "rbxassetid://115194686863276",
 				})
 
-				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S')})  
+				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S') .. string.format(".%03d", math.floor((tick() % 1) * 1000))})  
 
 				task.spawn(function()
-					while task.wait(1) do 
-						watermark.change_text(os.date('vert$! - Beta - %b %d %Y - %H:%M:%S'))
+					while task.wait() do -- Changed to task.wait() without parameter for faster updates
+						local current_time = tick()
+						local milliseconds = math.floor((current_time % 1) * 1000)
+						watermark.change_text(os.date('vert$! - Beta - %b %d %Y - %H:%M:%S') .. string.format(".%03d", milliseconds))
 					end 
 				end) 
 
