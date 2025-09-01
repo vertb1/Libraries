@@ -14,12 +14,12 @@ end)
 -- documentation 
 	local window = library:window({name = os.date('vert$! | ' .. gameName .. ' - %b %d %Y'), size = dim2(0, 750, 0, 782)})
 
-	local Aiming = window:tab({name = "Aiming"})
+	local Main = window:tab({name = "Main"})
 	local Misc = window:tab({name = "Misc"})
 	local Visuals = window:tab({name = "Visuals"})
 
-	-- Aiming
-		local column =  Aiming:column() 
+	-- Main
+		local column =  Main:column() 
 			local selec, lock, assist  = column:multi_section({names = {"Selection", "Lock"}})
 				selec:toggle({name = "Enabled", flag = "target_selected", tooltip = "Manages selection of the target (both lock and aim assist)"})
 				:keybind({name = "Aiming", flag = "target_selected_bind"})
@@ -35,7 +35,7 @@ end)
 				lock:toggle({name = "Auto Shoot", flag = "auto_shoot"})
 				lock:dropdown({name = "Aim Bone", flag = "silent_aim_bone", items = {"Hrp", "Head"}, default = "Head"})                lock:toggle({name = "Invisible Bullets", flag = "invis_bullet", tooltip = "Makes your bullets invisible"})
 				
-		local column =  Aiming:column() 
+		local column =  Main:column() 
 			local vis, other  = column:multi_section({names = {"Visuals", "Other"}})
 				other:toggle({name = "Look At", flag = "look_at"})
 				other:toggle({name = "Spectate", flag = "spectate"})
@@ -102,7 +102,7 @@ end)
 		esp = window.esp_section:esp_preview({})
 	-- 
 
-	Aiming.open_tab() 
+	Main.open_tab() 
 -- 
 
 -- Initialisation stuff
