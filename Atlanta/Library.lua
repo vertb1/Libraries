@@ -130,12 +130,12 @@ local load_start_time = tick()
 		preset = {
 			["outline"] = hex("#0A0A0A"), -- 
 			["inline"] = hex("#2D2D2D"), --
-			["accent"] = hex("#6078BE"), --
+			["accent"] = hex("#FFB6C1"), -- Light pink
 			["high_contrast"] = hex("#141414"),
 			["low_contrast"] = hex("#1E1E1E"),
 			["text"] = hex("#B4B4B4"),
 			["text_outline"] = rgb(0, 0, 0),
-			["glow"] = hex("#6078BE"), 
+			["glow"] = hex("#FFB6C1"), -- Light pink glow
 		},
 
 		utility = {
@@ -1746,7 +1746,7 @@ local load_start_time = tick()
 				:colorpicker({name = "Glow", color = themes.preset.glow, callback = function(color, alpha)
 					library:update_theme("glow", color)
 				end, flag = "Glow"})
-				section:slider({name = "Blur Size", flag = "Blur Size", min = 0, max = 56, default = 15, interval = 1, callback = function(int)
+				section:slider({name = "Blur Size", flag = "Blur Size", min = 0, max = 56, default = 0, interval = 1, callback = function(int)
 					if window.opened then 
 						blur.Size = int
 					end
