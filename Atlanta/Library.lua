@@ -20,6 +20,9 @@ getgenv().vert_ui_loaded = true
 getgenv().vert_ui_guis = getgenv().vert_ui_guis or {}
 getgenv().vert_ui_connections = getgenv().vert_ui_connections or {}
 
+-- Track load start time
+local load_start_time = tick()
+
 -- variables
 	local uis = cloneref(game:GetService("UserInputService"))
 	local players = cloneref(game:GetService("Players"))
@@ -6029,6 +6032,14 @@ getgenv().vert_ui_connections = getgenv().vert_ui_connections or {}
 task.spawn(function()
 	task.wait(1) -- Wait a moment for everything to initialize
 	library:execute_auto_load()
+end)
+
+-- Calculate load time and show notification
+local load_end_time = tick()
+local load_time_ms = math.floor((load_end_time - load_start_time) * 1000)
+task.spawn(function()
+	task.wait(0.5) -- Wait a moment for UI to fully initialize
+	library:notification({text = "Loaded modules successfully " .. load_time_ms .. "ms", time = 4})
 end)
 
 return library, themes; 
