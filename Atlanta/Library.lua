@@ -1431,7 +1431,7 @@ local load_start_time = tick()
 				local outline = library:create("Frame", {
 					Parent = sgui,
 					Name = "",
-					Visible = false, 
+					Visible = true, 
 					Active = true,
 					Draggable = true, 
 					Position = dim2(0, 50, 0, 200),
@@ -1689,6 +1689,9 @@ local load_start_time = tick()
 				})
 
 				local watermark = library:watermark({default = os.date('vert$! |  - %b %d %Y - %H:%M:%S') .. " | " .. math.floor(stats.Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms"})  
+				
+				-- Make watermark and keybind list visible by default
+				watermark.set_visible(true)
 
 				task.spawn(function()
 					while task.wait(0.1) do -- Update every 100ms for smoother ping updates
@@ -1751,12 +1754,6 @@ local load_start_time = tick()
 				local section = column:section({name = "Other"})
 				section:label({name = "UI Bind"})
 				:keybind({callback = window.set_menu_visibility, key = Enum.KeyCode.Insert})
-				section:toggle({name = "Keybind List", flag = "keybind_list", callback = function(bool)
-					library.keybind_list_frame.Visible = bool
-				end})
-				section:toggle({name = "Watermark", flag = "watermark", callback = function(bool)
-					watermark.set_visible(bool)
-				end})
 				section:button_holder({})
 				section:button({name = "Copy JobId", callback = function()
 					setclipboard(game.JobId)
