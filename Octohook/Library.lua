@@ -1,3 +1,5 @@
+
+
 -- Variables 
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, Lighting = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("Lighting")
     local Camera, LocalPlayer, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
@@ -1260,6 +1262,12 @@
                         BackgroundColor3 = themes.preset.accent
                     }); Library:Themify(Items.Accent, "accent", "BackgroundColor3")
 
+                    Items.AccentGradient = Library:Create( "UIGradient" , {
+                        Offset = vec2(0, 0);
+                        Transparency = numseq{numkey(0, 0), numkey(0.5, 1), numkey(1, 0)};
+                        Parent = Items.Accent
+                    });
+
                     Library:Create( "UIPadding", {
                         PaddingRight = dim(0, 2);
                         Parent = Items.Inline
@@ -1277,7 +1285,7 @@
                         Name = "\0";
                         Visible = true;
                         ZIndex = 5;
-                        Position = dim2(0, 50, 0, 100);
+                        Position = dim2(0, 50, 0, 200);
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         AutomaticSize = Enum.AutomaticSize.X;
@@ -1685,6 +1693,7 @@
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
             Library.KeybindList.Items.List.Visible = true
+            Library.KeybindList.Items.List.Position = dim2(0, 50, 0, 200)
 
             local Items = Cfg.Items; do
                 -- Items 
@@ -1766,7 +1775,8 @@
                 Parent = Library.Elements;
                 Name = "\0";
                 Visible = true;
-                Position = dim2(0.024000000208616257, 0, 0, 80);
+                Position = dim2(1, -200, 0, 80);
+                AnchorPoint = vec2(1, 0);
                 BorderColor3 = rgb(0, 0, 0);
                 BorderSizePixel = 0;
                 AutomaticSize = Enum.AutomaticSize.XY;
@@ -1855,16 +1865,21 @@
             });
 
             Library:Connection(RunService.RenderStepped, function()
-                if not Items.Watermark.Visible then 
-                    return 
-                end 
-
                 local Tick = tick()
                 Cfg.Fps += 1 
 
-                Items.FadingGradient.Offset = vec2(math.sin(Tick), 0) 
+                -- Animate watermark gradient if visible
+                if Items.Watermark.Visible then 
+                    Items.FadingGradient.Offset = vec2(math.sin(Tick), 0) 
+                end
 
-                if Tick - Cfg.Tick >= 1 then 
+                -- Animate keybind list gradient if visible
+                if Library.KeybindList.Items.List.Visible then
+                    Library.KeybindList.Items.AccentGradient.Offset = vec2(math.sin(Tick), 0)
+                end
+
+                -- Update watermark text
+                if Items.Watermark.Visible and Tick - Cfg.Tick >= 1 then 
                     Cfg.Tick = Tick
 
                     local Ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
