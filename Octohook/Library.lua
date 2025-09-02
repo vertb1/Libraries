@@ -1,17 +1,4 @@
---[[
-    vert$! UI Library
-    -> Customized and modified for our needs
-    -> Based on Octohook library by @finobe
-    -> Modifications include:
-        Removed custom menu name/blur/font settings
-        Changed menu bind to Insert key
-        Added server notifications with player count info
-        Added config auto-load functionality
-        Removed debug print statements
-        Cleaned up watermark display
-        Added loading time notification
-    -> Ready for ur script implementation
---]]
+
 
 -- Variables 
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, Lighting = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("Lighting")
@@ -1186,10 +1173,6 @@
                 connection = nil 
             end
 
-            if Library.Blur then 
-                Library.Blur:Destroy()
-            end 
-
             getgenv().Library = nil 
         end
     --
@@ -1702,12 +1685,6 @@
                 DisplayOrder = 100;
             }); 
 
-            Library.Blur = Library:Create( "BlurEffect" , {
-                Parent = Lighting;
-                Enabled = true;
-                Size = 0
-            });
-
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
             Library.KeybindList.Items.List.Visible = true
 
@@ -1723,246 +1700,17 @@
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
                     });
-
-                    Items.FirstInline = Library:Create( "Frame" , {
-                        BorderColor3 = rgb(0, 0, 0);
-                        Parent = Items.Holder;
-                        Name = "\0";
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 6, 0, 26);
-                        Size = dim2(1, -12, 1, -36);
-                        ZIndex = 2;
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-
-                    local Stroke = Library:Create( "UIStroke" , {
-                        Color = rgb(40, 40, 45);
-                        LineJoinMode = Enum.LineJoinMode.Miter;
-                        Parent = Items.FirstInline
-                    });	Library:Themify(Stroke, "inline", "Color")
-
-                    Items.SecondInline = Library:Create( "Frame" , {
-                        BorderColor3 = rgb(0, 0, 0);
-                        Parent = Items.FirstInline;
-                        Name = "\0";
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 1, 0, 1);
-                        Size = dim2(1, -2, 1, -2);
-                        ZIndex = 2;
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    });
-
-                    local Stroke = Library:Create( "UIStroke" , {
-                        Color = themes.preset.outline;
-                        LineJoinMode = Enum.LineJoinMode.Miter;
-                        Parent = Items.SecondInline
-                    });	Library:Themify(Stroke, "outline", "Color");
-
-                    Items.Accent = Library:Create( "Frame" , {
-                        Name = "\0";
-                        Parent = Items.SecondInline;
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, 0, 0, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.accent
-                    });	Library:Themify(Items.Accent, "accent", "BackgroundColor3")
-
-                    Items.ThirdInline = Library:Create( "Frame" , {
-                        Parent = Items.SecondInline;
-                        Name = "\0";
-                        Position = dim2(0, 0, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, 0, 0, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.inline
-                    });	Library:Themify(Items.ThirdInline, "inline", "BackgroundColor3")
-
-                    Items.Outline = Library:Create( "Frame" , {
-                        Parent = Items.SecondInline;
-                        Name = "\0";
-                        Position = dim2(0, 0, 0, 2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, 0, 0, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.outline
-                    });	Library:Themify(Items.Outline, "outline", "BackgroundColor3")
-
-                    Items.InnerOutline = Library:Create( "Frame" , {
-                        Parent = Items.Holder;
-                        Name = "\0";
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 6, 0, 26);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -12, 1, -36);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-
-                    local Stroke = Library:Create( "UIStroke" , {
-                        Color = rgb(15, 15, 20);
-                        LineJoinMode = Enum.LineJoinMode.Miter;
-                        Parent = Items.InnerOutline;
-                        Thickness = 10000
-                    }); Library:Themify(Stroke, "outline", "Color");
-
-                    Items.Title = Library:Create( "TextLabel" , {
-                        FontFace = Fonts[themes.preset.font];
-                        TextColor3 = rgb(235, 235, 235);
-                        TextStrokeColor3 = rgb(255, 255, 255);
-                        Parent = Items.InnerOutline;
-                        Name = "\0";
-                        AnchorPoint = vec2(0, 1);
-                        BorderSizePixel = 0;
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, -1, 0, -8);
-                        BorderColor3 = rgb(0, 0, 0);
-                        AutomaticSize = Enum.AutomaticSize.XY;
-                        TextSize = 12;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    });
-
-                    Library:Create( "UIStroke" , {
-                        Parent = Items.Title;
-                        LineJoinMode = Enum.LineJoinMode.Miter
-                    });
-
-                    Items.WindowButtonHolder = Library:Create( "Frame" , {
-                        BorderColor3 = rgb(0, 0, 0);
-                        AnchorPoint = vec2(1, 1);
-                        Parent = Items.InnerOutline;
-                        BackgroundTransparency = 1;
-                        Position = dim2(1, 1, 0, -6);
-                        Name = "\0";
-                        Size = dim2(0, 0, 0, 16);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    });
-
-                    Library:Create( "UIListLayout" , {
-                        FillDirection = Enum.FillDirection.Horizontal;
-                        HorizontalAlignment = Enum.HorizontalAlignment.Right;
-                        Parent = Items.WindowButtonHolder;
-                        Padding = dim(0, 7);
-                        SortOrder = Enum.SortOrder.LayoutOrder
-                    });
-                -- 
-
-                -- Watermark
-                    Items.Watermark = Library:Create( "Frame" , {
-                        Parent = Library.Elements;
-                        Name = "\0";
-                        Visible = true;
-                        Position = dim2(0.024000000208616257, 0, 0, 80);
-                        BorderColor3 = rgb(0, 0, 0);
-                        BorderSizePixel = 0;
-                        AutomaticSize = Enum.AutomaticSize.XY;
-                        BackgroundColor3 = themes.preset.outline
-                    });	Library:Themify(Items.Watermark, "outline", "BackgroundColor3")
-                    Library:Draggify(Items.Watermark)
-
-                    Items.AccentLineFade = Library:Create( "Frame" , {
-                        Parent = Items.Watermark;
-                        Size = dim2(1, -3, 0, 1);
-                        Name = "\0";
-                        Position = dim2(0, 2, 0, 2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        ZIndex = 3;
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.accent
-                    }); Library:Themify(Items.AccentLineFade, "accent", "BackgroundColor3")
-                    
-                    Items.FadingGradient = Library:Create( "UIGradient" , {
-                        Offset = vec2(0, 0);
-                        Transparency = numseq{numkey(0, 0), numkey(0.5, 1), numkey(1, 0)};
-                        Parent = Items.AccentLineFade
-                    });
-
-                    Items.Inline = Library:Create( "Frame" , {
-                        Parent = Items.Watermark;
-                        Name = "\0";
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        BorderSizePixel = 0;
-                        AutomaticSize = Enum.AutomaticSize.XY;
-                        BackgroundColor3 = themes.preset.inline
-                    });	Library:Themify(Items.Inline, "inline", "BackgroundColor3")
-
-                    Items.Background = Library:Create( "Frame" , {
-                        Parent = Items.Inline;
-                        Name = "\0";
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        BorderSizePixel = 0;
-                        AutomaticSize = Enum.AutomaticSize.XY;
-                        BackgroundColor3 = rgb(28, 28, 33)
-                    });
-
-                    Items.Text = Library:Create( "TextLabel" , {
-                        RichText = true;
-                        Parent = Items.Background;
-                        TextColor3 = themes.preset.accent;
-                        TextStrokeColor3 = rgb(255, 255, 255);
-                        Text = 'vert$! <font color = "rgb(235, 235, 235)">/ 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
-                        Name = "\0";
-                        AutomaticSize = Enum.AutomaticSize.XY;
-                        BorderSizePixel = 0;
-                        BorderColor3 = rgb(0, 0, 0);
-                        BackgroundTransparency = 1;
-                        TextXAlignment = Enum.TextXAlignment.Left;
-                        FontFace = Fonts[themes.preset.font];
-                        ZIndex = 2;
-                        TextSize = 12;
-                        BackgroundColor3 = themes.preset.accent
-                    });	Library:Themify(Items.Text, "accent", "TextColor3")
-
-                    Library:Create( "UIStroke" , {
-                        Parent = Items.Text;
-                        LineJoinMode = Enum.LineJoinMode.Miter
-                    });
-
-                    Library:Create( "UIPadding" , {
-                        PaddingTop = dim(0, 5);
-                        PaddingBottom = dim(0, 6);
-                        Parent = Items.Text;
-                        PaddingRight = dim(0, 4);
-                        PaddingLeft = dim(0, 6)
-                    });
-
-                    Library:Create( "UIPadding" , {
-                        PaddingBottom = dim(0, 1);
-                        PaddingRight = dim(0, 1);
-                        Parent = Items.Inline
-                    });
-
-                    Library:Create( "UIPadding" , {
-                        PaddingBottom = dim(0, 1);
-                        PaddingRight = dim(0, 1);
-                        Parent = Items.Watermark
-                    });
                 -- 
             end
 
             function Cfg.ChangeMenuTitle(string)
-                Items.Title.Text = string
+                -- Title functionality removed
             end 
-
-            -- recommended that you use richtext for automatic theming of the accent text.
-            function Cfg.ChangeWatermarkTitle(string) 
-                Items.Text.Text = string
-            end 
-
-            function Cfg.SetWatermarkVisible(bool)
-                Items.Watermark.Visible = bool
-            end
 
             function Cfg.SetVisible(bool)
                 if Library.Tweening then
                     return 
                 end     
-
-                Library:Tween(Library.Blur, {Size = bool and (Flags["BlurSize"] or 15) or 0})
 
                 Cfg.Tween(bool)
             end 
@@ -2005,26 +1753,6 @@
             end 
             
             Cfg.SetVisible(true)
-
-            Library:Connection(RunService.RenderStepped, function()
-                if not Items.Watermark.Visible then 
-                    return 
-                end 
-
-                local Tick = tick()
-                Cfg.Fps += 1 
-
-                Items.FadingGradient.Offset = vec2(math.sin(Tick), 0) 
-
-                if Tick - Cfg.Tick >= 1 then 
-                    Cfg.Tick = Tick
-
-                    local Ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-                    Cfg.ChangeWatermarkTitle(string.format('%s <font color = "%s">/ %s / %sfps / %sms</font>', Cfg.Name, Library:ConvertHex(themes.preset.text_color), os.date("%x / %X"), Cfg.Fps, Ping))
-
-                    Cfg.Fps = 0
-                end 
-            end)
 
             -- Auto-load config if one is set
             spawn(function()
