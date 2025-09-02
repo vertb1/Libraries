@@ -1707,6 +1707,15 @@
                 -- Title functionality removed
             end 
 
+            -- recommended that you use richtext for automatic theming of the accent text.
+            function Cfg.ChangeWatermarkTitle(string) 
+                Items.Text.Text = string
+            end 
+
+            function Cfg.SetWatermarkVisible(bool)
+                Items.Watermark.Visible = bool
+            end
+
             function Cfg.SetVisible(bool)
                 if Library.Tweening then
                     return 
@@ -1753,6 +1762,119 @@
             end 
             
             Cfg.SetVisible(true)
+
+            -- Watermark
+            Items.Watermark = Library:Create( "Frame" , {
+                Parent = Library.Elements;
+                Name = "\0";
+                Visible = true;
+                Position = dim2(0.024000000208616257, 0, 0, 80);
+                BorderColor3 = rgb(0, 0, 0);
+                BorderSizePixel = 0;
+                AutomaticSize = Enum.AutomaticSize.XY;
+                BackgroundColor3 = themes.preset.outline
+            });	Library:Themify(Items.Watermark, "outline", "BackgroundColor3")
+            Library:Draggify(Items.Watermark)
+
+            Items.AccentLineFade = Library:Create( "Frame" , {
+                Parent = Items.Watermark;
+                Size = dim2(1, -3, 0, 1);
+                Name = "\0";
+                Position = dim2(0, 2, 0, 2);
+                BorderColor3 = rgb(0, 0, 0);
+                ZIndex = 3;
+                BorderSizePixel = 0;
+                BackgroundColor3 = themes.preset.accent
+            }); Library:Themify(Items.AccentLineFade, "accent", "BackgroundColor3")
+            
+            Items.FadingGradient = Library:Create( "UIGradient" , {
+                Offset = vec2(0, 0);
+                Transparency = numseq{numkey(0, 0), numkey(0.5, 1), numkey(1, 0)};
+                Parent = Items.AccentLineFade
+            });
+
+            Items.Inline = Library:Create( "Frame" , {
+                Parent = Items.Watermark;
+                Name = "\0";
+                Position = dim2(0, 1, 0, 1);
+                BorderColor3 = rgb(0, 0, 0);
+                BorderSizePixel = 0;
+                AutomaticSize = Enum.AutomaticSize.XY;
+                BackgroundColor3 = themes.preset.inline
+            });	Library:Themify(Items.Inline, "inline", "BackgroundColor3")
+
+            Items.Background = Library:Create( "Frame" , {
+                Parent = Items.Inline;
+                Name = "\0";
+                Position = dim2(0, 1, 0, 1);
+                BorderColor3 = rgb(0, 0, 0);
+                BorderSizePixel = 0;
+                AutomaticSize = Enum.AutomaticSize.XY;
+                BackgroundColor3 = rgb(28, 28, 33)
+            });
+
+            Items.Text = Library:Create( "TextLabel" , {
+                RichText = true;
+                Parent = Items.Background;
+                TextColor3 = themes.preset.accent;
+                TextStrokeColor3 = rgb(255, 255, 255);
+                Text = 'vert$! <font color = "rgb(235, 235, 235)">/ 00/00/0000 / 00:00:00 / 0fps / Oms</font>';
+                Name = "\0";
+                AutomaticSize = Enum.AutomaticSize.XY;
+                BorderSizePixel = 0;
+                BorderColor3 = rgb(0, 0, 0);
+                BackgroundTransparency = 1;
+                TextXAlignment = Enum.TextXAlignment.Left;
+                FontFace = Fonts[themes.preset.font];
+                ZIndex = 2;
+                TextSize = 12;
+                BackgroundColor3 = themes.preset.accent
+            });	Library:Themify(Items.Text, "accent", "TextColor3")
+
+            Library:Create( "UIStroke" , {
+                Parent = Items.Text;
+                LineJoinMode = Enum.LineJoinMode.Miter
+            });
+
+            Library:Create( "UIPadding" , {
+                PaddingTop = dim(0, 5);
+                PaddingBottom = dim(0, 6);
+                Parent = Items.Text;
+                PaddingRight = dim(0, 4);
+                PaddingLeft = dim(0, 6)
+            });
+
+            Library:Create( "UIPadding" , {
+                PaddingBottom = dim(0, 1);
+                PaddingRight = dim(0, 1);
+                Parent = Items.Inline
+            });
+
+            Library:Create( "UIPadding" , {
+                PaddingBottom = dim(0, 1);
+                PaddingRight = dim(0, 1);
+                Parent = Items.Watermark
+            });
+
+            Library:Connection(RunService.RenderStepped, function()
+                if not Items.Watermark.Visible then 
+                    return 
+                end 
+
+                local Tick = tick()
+                Cfg.Fps += 1 
+
+                Items.FadingGradient.Offset = vec2(math.sin(Tick), 0) 
+
+                if Tick - Cfg.Tick >= 1 then 
+                    Cfg.Tick = Tick
+
+                    local Ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
+                    Cfg.ChangeWatermarkTitle(string.format('%s <font color = "%s">/ %s / %sfps / %sms</font>', Cfg.Name, Library:ConvertHex(themes.preset.text_color), os.date("%x / %X"), Cfg.Fps, Ping))
+
+                    Cfg.Fps = 0
+                end 
+            end)
 
             -- Auto-load config if one is set
             spawn(function()
