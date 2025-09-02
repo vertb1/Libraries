@@ -1,5 +1,3 @@
-
-
 -- Variables 
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, Lighting = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("Lighting")
     local Camera, LocalPlayer, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
@@ -1692,8 +1690,6 @@
             }); 
 
             Library.KeybindList = Library:StatusList({Name = "Keybinds"})
-            Library.KeybindList.Items.List.Visible = true
-            Library.KeybindList.Items.List.Position = dim2(0, 50, 0, 200)
 
             local Items = Cfg.Items; do
                 -- Items 
@@ -4155,9 +4151,6 @@
                             Cfg.Set(option)
                         end
                     end, Default = Cfg.Mode, Flag = Cfg.Flag .. "_MODE"})
-                    Section:Toggle({Name = "Show on list", Flag = Cfg.Flag .. "_LIST", Callback = function()
-                        KeybindElement.SetVisible(Flags[Cfg.Flag .. "_LIST"] and Cfg.Active or false)
-                    end})
                 --
             end 
 
@@ -4219,7 +4212,7 @@
                 }
                 
                 KeybindElement.SetText(string.format("%s [%s] - %s", Cfg.Name, __text, Cfg.Mode))
-                KeybindElement.SetVisible(Flags[Cfg.Flag .. "_LIST"] and Cfg.Active or false)
+                KeybindElement.SetVisible(Cfg.Active)
             end
 
             function Cfg.SetVisible(bool)
