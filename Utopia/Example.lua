@@ -1,7 +1,7 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/i77lhm/Libraries/refs/heads/main/Utopia/Library.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vertb1/Libraries/refs/heads/main/Utopia/Library.lua"))()
 
 local Window = Library:Window({
-    Name = "U T O P I A",
+    Name = "dih cheese",
     GradientTitle = {
         Enabled = true,
         Start = Color3.fromRGB(255, 255, 255),
