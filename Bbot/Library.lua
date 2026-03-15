@@ -1,12 +1,6 @@
 -- Probably my newest code up to date thats available publicly. 
 -- Made around march - april 2025
 
--- Start load timer
-local loadStartTime = tick()
-
--- Protected library loading
-local success, result = pcall(function()
-
 -- Variables 
     -- Services
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
@@ -21,14 +15,8 @@ local success, result = pcall(function()
 -- 
 
 -- Library init
-    -- Prevent multiple instances
-    if getgenv().Library then
-        getgenv().Library:Unload()
-        wait(0.1) -- Small delay to ensure cleanup
-    end
-
     getgenv().Library = {
-        Directory = "vert$!",
+        Directory = "Bbot v3",
         Folders = {
             "/fonts",
             "/configs",
@@ -1250,18 +1238,11 @@ local success, result = pcall(function()
             local Config = {}
             
             for Idx, Value in Flags do
-                if type(Value) == "table" and (Value.key or Value.Key) then
-                    -- Handle keybinds
-                    Config[Idx] = {
-                        active = Value.active or Value.Active, 
-                        mode = Value.mode or Value.Mode, 
-                        key = tostring(Value.key or Value.Key)
-                    }
+                if type(Value) == "table" and Value.key then
+                    Config[Idx] = {active = Value.Active, mode = Value.Mode, key = tostring(Value.Key)}
                 elseif type(Value) == "table" and Value["Transparency"] and Value["Color"] then
-                    -- Handle colorpickers
                     Config[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
                 else
-                    -- Handle regular values (toggles, sliders, dropdowns, etc.)
                     Config[Idx] = Value
                 end
             end 
@@ -1281,13 +1262,10 @@ local success, result = pcall(function()
 
                 if Function then 
                     if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
-                        -- Handle colorpickers
                         Function(hex(Value["Color"]), Value["Transparency"])
-                    elseif type(Value) == "table" and (Value["active"] or Value["Active"]) then 
-                        -- Handle keybinds
+                    elseif type(Value) == "table" and Value["Active"] then 
                         Function(Value)
                     else
-                        -- Handle regular values (toggles, sliders, dropdowns, etc.)
                         Function(Value)
                     end
                 end 
@@ -1375,66 +1353,27 @@ local success, result = pcall(function()
         end
 
         function Library:Unload() 
-            print("[vert$!] Unloading library...")
-            
-            -- Destroy GUI elements
             if Library.Items then 
                 Library.Items:Destroy()
-                Library.Items = nil
             end
 
             if Library.Other then 
                 Library.Other:Destroy()
-                Library.Other = nil
             end
             
-            -- Disconnect all connections
-            if Library.Connections then
-                for i, connection in ipairs(Library.Connections) do 
-                    if connection then
-                        connection:Disconnect() 
-                    end
-                end
-                Library.Connections = {}
-            end
-
-            -- Clear flags and config flags
-            if Library.Flags then
-                for flag, _ in pairs(Library.Flags) do
-                    Library.Flags[flag] = nil
-                end
-            end
-
-            if Library.ConfigFlags then
-                for flag, _ in pairs(Library.ConfigFlags) do
-                    Library.ConfigFlags[flag] = nil
-                end
-            end
-
-            -- Clear notifications
-            if Library.Notifications and Library.Notifications.Notifs then
-                for i, notif in ipairs(Library.Notifications.Notifs) do
-                    if notif then
-                        notif:Destroy()
-                    end
-                end
-                Library.Notifications.Notifs = {}
-            end
-
-            -- Clear open elements
-            if Library.OpenElement then
-                Library.OpenElement = {}
+            for _,connection in Library.Connections do 
+                connection:Disconnect() 
+                connection = nil 
             end
 
             getgenv().Library = nil 
-            print("[vert$!] Library unloaded successfully!")
         end
     --
     
     -- Library element functions
         function Library:Window(properties)
             local Cfg = {
-                Name = properties.Name or "vert$!";
+                Name = properties.Name or "nebula";
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 TabInfo;
                 Items = {};
@@ -1959,7 +1898,7 @@ local success, result = pcall(function()
                         TextColor3 = rgb(239, 239, 239);
                         BorderColor3 = rgb(0, 0, 0);
                         RichText = true;
-                        Text = "vert$!.lua";
+                        Text = Cfg.Name .. "lua";
                         Parent = Items.Watermark;
                         Name = "\0";
                         BackgroundTransparency = 1;
@@ -1986,7 +1925,7 @@ local success, result = pcall(function()
                     Library:Create( "ImageLabel" , {
                         BorderColor3 = rgb(0, 0, 0);
                         Parent = Items.Watermark;
-                        Image = "rbxassetid://83405774675759";
+                        Image = "rbxassetid://133601737414791";
                         BackgroundTransparency = 1;
                         Position = dim2(0, 3, 0, 2);
                         Size = dim2(0, 11, 0, 15);
@@ -2042,57 +1981,23 @@ local success, result = pcall(function()
                 Items.UITitle.Text = text
             end
 
+            function Cfg.ToggleWatermark(bool) 
+                Items.Watermark.Visible = bool
+            end 
+
             function Cfg.ChangeWatermarkTitle(text)
-                Cfg.WatermarkBaseName = text or "vert$!.lua"
+                Items.WatermarkTitle.Text = text
             end
 
-            -- Ensure watermark and keybind list are always visible
-            Items.Watermark.Visible = true
-            Items.Keybind_List.Visible = true
-
-            -- Live watermark updating
-            do
-                Cfg.WatermarkBaseName = "vert$!.lua" -- Default base name
-                local gameName = "Unknown Game"
-                
-                -- Get game name
-                pcall(function()
-                    local MarketplaceService = game:GetService("MarketplaceService")
-                    local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
-                    if gameInfo and gameInfo.Name then
-                        gameName = gameInfo.Name
-                        -- Truncate if too long
-                        if #gameName > 20 then
-                            gameName = string.sub(gameName, 1, 17) .. "..."
-                        end
-                    end
-                end)
-                
-                local lastUpdate = 0
-                Library:Connection(RunService.Heartbeat, function()
-                    local currentTime = tick()
-                    -- Update every 500ms for performance
-                    if currentTime - lastUpdate >= 0.5 then
-                        lastUpdate = currentTime
-                        local dateStr = os.date("%m/%d/%Y")
-                        local timeStr = os.date("%H:%M:%S")
-                        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-                        Items.WatermarkTitle.Text = string.format("%s | %s | %s | %s | %sms", Cfg.WatermarkBaseName, gameName, dateStr, timeStr, ping)
-                    end
-                end)
+            function Cfg.ToggleStatus(bool) 
+                Items.Activity.Visible = bool
+                Items.ActivityLine.Visible = bool
             end
 
-            -- Auto-load config if one is set
-            spawn(function()
-                wait(1) -- Wait a bit for everything to initialize
-                if isfile(Library.Directory .. "/autoload.txt") then
-                    local autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
-                    if isfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg") then
-                        Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. autoLoadConfig .. ".cfg"))
-                        Notifications:Create({Name = "Auto-loaded config: " .. autoLoadConfig})
-                    end
-                end
-            end)
+            function Cfg.ToggleKeybindList(bool)
+                Items.Keybind_List.Visible = bool
+                print(bool)
+            end
             
             return setmetatable(Cfg, Library)
         end 
@@ -3509,7 +3414,7 @@ local success, result = pcall(function()
                     
                     -- Elements
                         Items.Group = Library:Create( "Frame" , {
-                            LayoutOrder = 2;
+                            LayoutOrder = 0;
                             BorderColor3 = rgb(0, 0, 0);
                             Parent = Library.Other;
                             Name = "\0";
@@ -4347,7 +4252,7 @@ local success, result = pcall(function()
                     Active = false;
                     Selectable = false;
                     PlaceholderColor3 = themes.preset.text_color;
-                    PlaceholderText = "";
+                    PlaceholderText = "Hi!";
                     TextSize = 12;
                     TextTruncate = Enum.TextTruncate.AtEnd;
                     Size = dim2(1, 0, 1, 0);
@@ -4855,6 +4760,15 @@ local success, result = pcall(function()
             local Text;
             local ConfigText; 
 
+            local function ConfigPath()
+                local Name = tostring(ConfigText or ""):gsub("^%s+", ""):gsub("%s+$", "")
+                if Name == "" then
+                    return nil
+                end
+
+                return Library.Directory .. "/configs/" .. Name .. ".cfg"
+            end
+
             local Tab = window:Tab({Name = "Settings"})
 
             local Section = Tab:Section({Name = "Main", Side = "Left"})
@@ -4865,80 +4779,49 @@ local success, result = pcall(function()
             end})
             window.Tweening = false
             Section:Button({Name = "Save", Callback = function() 
-                writefile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg", Library:GetConfig())
+                local Path = ConfigPath()
+                if not Path then
+                    Notifications:Create({Name = "Please enter a config name first"})
+                    return
+                end
+
+                writefile(Path, Library:GetConfig())
                 Library:UpdateConfigList()
-                Notifications:Create({Name = "Saved Config (" ..  Library.Directory .. "/configs/" .. ConfigText .. ".cfg" .. ")"}) 
+                Notifications:Create({Name = "Saved Config (" ..  Path .. ")"}) 
             end})
 
             Section:Button({Name = "Load", Callback = function() 
-                Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg"))  
+                local Path = ConfigPath()
+                if not Path then
+                    Notifications:Create({Name = "Please enter a config name first"})
+                    return
+                end
+
+                if not isfile(Path) then
+                    Notifications:Create({Name = "Config does not exist (" .. Path .. ")"})
+                    return
+                end
+
+                Library:LoadConfig(readfile(Path))  
                 Library:UpdateConfigList() 
-                Notifications:Create({Name = "Loaded Config (" ..  Library.Directory .. "/configs/" .. ConfigText .. ".cfg" .. ")"}) 
+                Notifications:Create({Name = "Loaded Config (" ..  Path .. ")"}) 
             end})
 
             Section:Button({Name = "Delete", Callback = function() 
-                delfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg")  
+                local Path = ConfigPath()
+                if not Path then
+                    Notifications:Create({Name = "Please enter a config name first"})
+                    return
+                end
+
+                if not isfile(Path) then
+                    Notifications:Create({Name = "Config does not exist (" .. Path .. ")"})
+                    return
+                end
+
+                delfile(Path)  
                 Library:UpdateConfigList() 
-                Notifications:Create({Name = "Deleted Config (" ..  Library.Directory .. "/configs/" .. ConfigText .. ".cfg" .. ")"}) 
-            end})
-
-            Section:Button({Name = "Overwrite Config", Callback = function() 
-                if ConfigText and ConfigText ~= "" then
-                    if isfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg") then
-                        writefile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg", Library:GetConfig())
-                        Notifications:Create({Name = "Overwritten Config: " .. ConfigText}) 
-                    else
-                        Notifications:Create({Name = "Config doesn't exist: " .. ConfigText}) 
-                    end
-                else
-                    Notifications:Create({Name = "Please enter a config name first!"}) 
-                end
-            end})
-
-            -- Auto load status display
-            local AutoLoadText = Section:Label({Name = "Auto Load: None"})
-            
-            -- Function to update auto load display
-            local function UpdateAutoLoadDisplay()
-                if isfile(Library.Directory .. "/autoload.txt") then
-                    local autoLoadConfig = readfile(Library.Directory .. "/autoload.txt")
-                    AutoLoadText.Set("Auto Load: " .. autoLoadConfig)
-                else
-                    AutoLoadText.Set("Auto Load: None")
-                end
-            end
-            
-            -- Update display initially
-            UpdateAutoLoadDisplay()
-
-            Section:Button({Name = "Set as Auto Load", Callback = function() 
-                if ConfigText and ConfigText ~= "" then
-                    if isfile(Library.Directory .. "/configs/" .. ConfigText .. ".cfg") then
-                        writefile(Library.Directory .. "/autoload.txt", ConfigText)
-                        Notifications:Create({Name = "Set " .. ConfigText .. " as auto load config."}) 
-                        UpdateAutoLoadDisplay()
-                    else
-                        Notifications:Create({Name = "Config doesn't exist: " .. ConfigText}) 
-                    end
-                else
-                    Notifications:Create({Name = "Please enter a config name first!"}) 
-                end
-            end})
-
-            Section:Button({Name = "Remove Auto Load", Callback = function() 
-                if isfile(Library.Directory .. "/autoload.txt") then
-                    delfile(Library.Directory .. "/autoload.txt")
-                    Notifications:Create({Name = "Removed auto load config."}) 
-                    UpdateAutoLoadDisplay()
-                else
-                    Notifications:Create({Name = "No auto load config set."}) 
-                end
-            end})
-
-            Section:Button({Name = "Unload Library", Callback = function() 
-                Notifications:Create({Name = "Unloading vert$! Library..."}) 
-                wait(1) -- Give time for notification to show
-                Library:Unload()
+                Notifications:Create({Name = "Deleted Config (" ..  Path .. ")"}) 
             end})
 
             window.Tweening = true
@@ -4952,87 +4835,12 @@ local success, result = pcall(function()
 
             delay(2, function() window.Tweening = false end)
 
-            local ServerSection = Tab:Section({Name = "Server", Side = "Left"})
-            ServerSection:Button({Name = "Rejoin Server", Callback = function() 
-                Notifications:Create({Name = "Rejoining server..."}) 
-                game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
-            end})
-
-            ServerSection:Button({Name = "Server Hop", Callback = function() 
-                Notifications:Create({Name = "Finding new server..."}) 
-                local PlaceId = game.PlaceId
-                local AllIDs = {}
-                local foundAnything = ""
-                local actualHour = os.date("!*t").hour
-                local Deleted = false
-                
-                function TPReturner()
-                    local Site; if foundAnything == "" then Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100') else Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything) end
-                    local body = game:GetService('HttpService'):JSONDecode(Site)
-                    local cursor = body.nextPageCursor
-                    local servers = {}
-                    if game.JobId ~= "" and body.data then
-                        for i,v in pairs(body.data) do
-                            if type(v) == "table" and v.maxPlayers and v.playing and v.id ~= game.JobId then
-                                table.insert(servers, 1, v.id)
-                            end
-                        end
-                    end
-                    if #servers > 0 then
-                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceId, servers[math.random(1, #servers)], game:GetService("Players").LocalPlayer)
-                    else
-                        TPReturner()
-                    end
-                end
-                TPReturner()
-            end})
-
-            ServerSection:Button({Name = "Copy Job ID", Callback = function() 
-                setclipboard(game.JobId)
-                Notifications:Create({Name = "Job ID copied to clipboard!"}) 
-            end})
-
-            ServerSection:Button({Name = "Get Join Script", Callback = function() 
-                local script = string.format('game:GetService("TeleportService"):TeleportToPlaceInstance(%d, "%s", game:GetService("Players").LocalPlayer)', game.PlaceId, game.JobId)
-                setclipboard(script)
-                Notifications:Create({Name = "Join script copied to clipboard!"}) 
-            end})
-
-            ServerSection:Button({Name = "Join Lowest Server", Callback = function() 
-                Notifications:Create({Name = "Finding lowest player server..."}) 
-                local PlaceId = game.PlaceId
-                local Site = game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100')
-                local body = game:GetService('HttpService'):JSONDecode(Site)
-                local lowest = nil
-                local lowestPlayers = math.huge
-                
-                if body.data then
-                    for i,v in pairs(body.data) do
-                        if type(v) == "table" and v.maxPlayers and v.playing and v.id ~= game.JobId then
-                            if v.playing < lowestPlayers then
-                                lowestPlayers = v.playing
-                                lowest = v.id
-                            end
-                        end
-                    end
-                end
-                
-                if lowest then
-                    game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceId, lowest, game:GetService("Players").LocalPlayer)
-                else
-                    Notifications:Create({Name = "No suitable servers found!"}) 
-                end
-            end})
-
             local Section = Tab:Section({Name = "Other", Side = "Right"})
-            Section:Button({Name = "Test Notification", Callback = function()
-                if Library and Library.Notifications then
-                    Library.Notifications:Create({
-                        Name = "This is a test notification!",
-                        Lifetime = 5
-                    })
-                end
-            end})
+            Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
+            Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
+            Section:Toggle({Name = "Toggle Status", Flag = "Status", Callback = window.ToggleStatus})
+            Section:Textbox({Name = "Custom Menu Name", Callback = window.ChangeTitle, Default = window.Name, Placeholder = "Title name here..."})
+            Section:Textbox({Name = "Custom Watermark Name", Callback = window.ChangeWatermarkTitle, Default = window.Name .. ".lua", Placeholder = "Title name here..."})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
             end});
@@ -5241,47 +5049,4 @@ local success, result = pcall(function()
     --
 -- 
 
--- Show load success notification
-pcall(function()
-    local loadTime = tick() - loadStartTime
-    local loadTimeMs = math.floor(loadTime * 1000)
-    
-    -- Wait a moment for everything to initialize, then show load notification
-    task.spawn(function()
-        task.wait(0.1)
-        if Library and Library.Notifications and Library.Notifications.Create then
-            Library.Notifications:Create({
-                Name = string.format("vert$! - Successfully loaded in %dms", loadTimeMs),
-                Lifetime = 8
-            })
-        end
-    end)
-end)
-
 return Library, Notifications, themes
-
-end) -- End of pcall
-
--- Handle loading result
-if success then
-    -- Library loaded successfully, return the result
-    return result
-else
-    -- Library failed to load
-    local loadTime = tick() - loadStartTime
-    local loadTimeMs = math.floor(loadTime * 1000)
-    
-    warn("vert$! Library failed to load: " .. tostring(result))
-    
-    -- Try to show error notification if possible
-    pcall(function()
-        if getgenv().Library and getgenv().Library.Notifications then
-            getgenv().Library.Notifications:Create({
-                Name = string.format("vert$! - Failed to load after %dms - Check console", loadTimeMs),
-                Lifetime = 8
-            })
-        end
-    end)
-    
-    return nil
-end
