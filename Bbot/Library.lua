@@ -2084,6 +2084,7 @@
                         BackgroundTransparency = 1;
                         Position = dim2(0, 2, 0, 2);
                         BorderColor3 = rgb(0, 0, 0);
+                        ClipsDescendants = true;
                         Size = dim2(1, -4, 1, -4);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
@@ -2112,7 +2113,8 @@
                         BackgroundTransparency = 1;
                         Name = "\0";
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 100, 0, 100);
+                        ClipsDescendants = true;
+                        Size = dim2(0.5, -6, 1, -6);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
                     }); Library:Themify(Items.Left, "accent", "ScrollBarImageColor3")
@@ -2137,7 +2139,8 @@
                         BackgroundTransparency = 1;
                         Name = "\0";
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 100, 0, 100);
+                        ClipsDescendants = true;
+                        Size = dim2(0.5, -6, 1, -6);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
                     }); Library:Themify(Items.Right, "accent", "ScrollBarImageColor3")
