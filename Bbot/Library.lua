@@ -1552,6 +1552,7 @@
                         Parent = Items.PageHolder;
                         Name = "\0";
                         Position = dim2(0, 1, 0, 24);
+                        ClipsDescendants = true;
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, -25);
                         BorderSizePixel = 0;
@@ -2097,7 +2098,16 @@
                         VerticalFlex = Enum.UIFlexAlignment.Fill
                     });
                     
-                    Items.Left = Library:Create( "Frame" , {
+                    Items.Left = Library:Create( "ScrollingFrame" , {
+                        Active = true;
+                        ScrollingEnabled = true;
+                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                        CanvasSize = dim2(0, 0, 0, 0);
+                        ScrollBarImageColor3 = themes.preset.accent;
+                        MidImage = "rbxassetid://120496541810421";
+                        TopImage = "rbxassetid://118750478739322";
+                        BottomImage = "rbxassetid://74268315755026";
+                        ScrollBarThickness = 2;
                         Parent = Items.Page;
                         BackgroundTransparency = 1;
                         Name = "\0";
@@ -2105,7 +2115,7 @@
                         Size = dim2(0, 100, 0, 100);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
-                    });
+                    }); Library:Themify(Items.Left, "accent", "ScrollBarImageColor3")
                     
                     Library:Create( "UIListLayout" , {
                         Parent = Items.Left;
@@ -2113,7 +2123,16 @@
                         SortOrder = Enum.SortOrder.LayoutOrder
                     });
                     
-                    Items.Right = Library:Create( "Frame" , {
+                    Items.Right = Library:Create( "ScrollingFrame" , {
+                        Active = true;
+                        ScrollingEnabled = true;
+                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                        CanvasSize = dim2(0, 0, 0, 0);
+                        ScrollBarImageColor3 = themes.preset.accent;
+                        MidImage = "rbxassetid://120496541810421";
+                        TopImage = "rbxassetid://118750478739322";
+                        BottomImage = "rbxassetid://74268315755026";
+                        ScrollBarThickness = 2;
                         Parent = Items.Page;
                         BackgroundTransparency = 1;
                         Name = "\0";
@@ -2121,7 +2140,7 @@
                         Size = dim2(0, 100, 0, 100);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
-                    });
+                    }); Library:Themify(Items.Right, "accent", "ScrollBarImageColor3")
                     
                     Library:Create( "UIListLayout" , {
                         Parent = Items.Right;
@@ -4252,7 +4271,7 @@
                     Active = false;
                     Selectable = false;
                     PlaceholderColor3 = themes.preset.text_color;
-                    PlaceholderText = "Hi!";
+                    PlaceholderText = "nga";
                     TextSize = 12;
                     TextTruncate = Enum.TextTruncate.AtEnd;
                     Size = dim2(1, 0, 1, 0);
