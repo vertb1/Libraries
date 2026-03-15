@@ -3,7 +3,7 @@
 
 -- Variables 
     -- Services
-    local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
+    local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players, TeleportService = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players"), game:GetService("TeleportService")
     local Camera, lp, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
     local mouse = lp:GetMouse()
 
@@ -35,7 +35,7 @@
             inline = rgb(50, 50, 50);
             gradient = rgb(40, 40, 40);
             outline = rgb(20, 20, 20);
-            accent = rgb(50, 119, 186);
+            accent = rgb(93, 153, 255);
             background = rgb(30, 30, 30);
             text_color = rgb(239, 239, 239);
             text_outline = rgb(0, 0, 0);
@@ -1373,7 +1373,7 @@
     -- Library element functions
         function Library:Window(properties)
             local Cfg = {
-                Name = properties.Name or "nebula";
+                Name = properties.Name or "starlight";
                 Size = properties.Size or dim2(0, 455, 0, 605);
                 TabInfo;
                 Items = {};
@@ -4858,17 +4858,73 @@
             delay(2, function() window.Tweening = false end)
 
             local Section = Tab:Section({Name = "Other", Side = "Right"})
-            Section:Toggle({Name = "Watermark", Flag = "Watermark", Callback = window.ToggleWatermark})
             Section:Toggle({Name = "Keybind List", Flag = "KeybindList", Callback = window.ToggleKeybindList})
             Section:Toggle({Name = "Toggle Status", Flag = "Status", Callback = window.ToggleStatus})
-            Section:Textbox({Name = "Custom Menu Name", Callback = window.ChangeTitle, Default = window.Name, Placeholder = "Title name here..."})
-            Section:Textbox({Name = "Custom Watermark Name", Callback = window.ChangeWatermarkTitle, Default = window.Name .. ".lua", Placeholder = "Title name here..."})
             Section:Dropdown({Name = "Tweening Style", Options = {"Linear", "Sine", "Back", "Quad", "Quart", "Quint", "Bounce", "Elastic", "Exponential", "Circular", "Cubic"}, Flag = "LibraryEasingStyle", Default = "Quint", Callback = function(Option)
                 Library.EasingStyle = Enum.EasingStyle[Option]
             end});
             Section:Slider({Name = "Tweening Speed", Min = 0, Max = 10, Decimal = 0.01, Suffix = "s", Default = 0.25, Flag = "TweeningSpeed", Callback = function(int)
                 Library.TweeningSpeed = int
             end})
+
+            -- Server tools
+            local ServerSection = Tab:Section({Name = "Server", Side = "Right"})
+            local ServerTarget = 15
+
+            local function Notify(name)
+                Notifications:Create({Name = name})
+            end
+
+            local function Rejoin()
+                local ok, err = pcall(function()
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
+                end)
+
+                if not ok then
+                    Notify("Rejoin failed: " .. tostring(err))
+                end
+            end
+
+            local function ServerHop()
+                local cursor
+                for _ = 1, 3 do -- a few pages only
+                    local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100" .. (cursor and ("&cursor=" .. HttpService:UrlEncode(cursor)) or "")
+                    local ok, data = pcall(function()
+                        return HttpService:JSONDecode(game:HttpGet(url))
+                    end)
+
+                    if not ok or not data or not data.data then
+                        Notify("Server list failed")
+                        return
+                    end
+
+                    for _,server in data.data do
+                        if server.id ~= game.JobId and server.playing and server.maxPlayers and server.playing < server.maxPlayers and server.playing <= ServerTarget then
+                            local success, err = pcall(function()
+                                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                            end)
+                            if not success then
+                                Notify("Hop failed: " .. tostring(err))
+                            end
+                            return
+                        end
+                    end
+
+                    cursor = data.nextPageCursor
+                    if not cursor then
+                        break
+                    end
+                end
+
+                Notify("No suitable servers found")
+            end
+
+            ServerSection:Slider({Name = "Max Players", Min = 1, Max = 40, Decimal = 1, Default = ServerTarget, Flag = "Server_MaxPlayers", Callback = function(int)
+                ServerTarget = int
+            end})
+
+            ServerSection:Button({Name = "Rejoin", Callback = Rejoin})
+            ServerSection:Button({Name = "Server Hop", Callback = ServerHop})
 
             Section:Label({Name = "Inline"}):Colorpicker({Flag = "Inline", Callback = function(color, alpha) 
                 Library:RefreshTheme("inline", color) 
